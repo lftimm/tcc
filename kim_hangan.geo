@@ -1,67 +1,98 @@
-//DEFINIÇÕES
+// CONFIGURAÇÕES
 dz = 0.1;
 Djet = 1;
 Zjet = 4*Djet;
-y = 0.5*Zjet;
+splitHeight = 0.45*Zjet;
 
-slipWallYElements = 30;
-slipWallXElements = 30;
+// Aqui usei este valor como o governante no tamanho da malha
+// Defini mais ou menos o tamanho da região onde ocorrem os vórtices
+// Usei proporções entre os diferentes elementos pra compor uma malha mais uniforme
+elementCoef = 350;
 
-wallYElements = 50;
-wallXElements = 100;
-
-jetYElements = 25;
-
-//PONTOS
+// GEOMETRIA
 Point(1) = {0,0,0,1.0};
 Point(2) = {0,Zjet,0,1.0};
 Point(3) = {0.5*Djet,Zjet,0,1.0};
 Point(4) = {0.5*Djet,10*Djet,0,1.0};
 Point(5) = {10*Djet,10*Djet,0,1.0};
 Point(6) = {10*Djet,0,0,1.0};
-Point(7) = {0,y,0,0,1.0};
-Point(9) = {10*Djet,y,0,1.0};
-Point(10) = {10*Djet,y,0,1.0};
+Point(7) = {0,splitHeight,0,0,1.0};
+Point(9) = {10*Djet,splitHeight,0,1.0};
+Point(10) = {10*Djet,splitHeight,0,1.0};
 Point(11) = {10*Djet,Zjet,0,1.0};
+Point(12) = {0.5*Djet,splitHeight,0,1.0};
+Point(13) = {0.5*Djet,0,0,1.0};
 
-//GEOMETRIA
 Line(1) = {1, 7};
-Line(2) = {7, 9};
-Line(3) = {9, 6};
-Line(4) = {6, 1};
-Line(5) = {7, 2};
-Line(6) = {2, 11};
+Line(2) = {7, 2};
+Line(3) = {2, 3};
+Line(4) = {3, 4};
+Line(5) = {4, 5};
+Line(6) = {5, 11};
 Line(7) = {11, 9};
-Line(8) = {11, 3};
-Line(9) = {3, 4};
-Line(10) = {4, 5};
-Line(11) = {5, 11};
+Line(8) = {9, 6};
 
-//SUPERFICIES
-Curve Loop(1) = {9, 10, 11, 8};
+Line(11) = {3, 11};
+Line(13) = {12, 13};
+Line(14) = {3, 12};
+Line(15) = {12, 7};
+Line(16) = {9, 12};
+Line(17) = {6, 13};
+Line(18) = {13, 1};
+
+Curve Loop(1) = {2, 3, 14, 15};
 Plane Surface(1) = {1};
 
-Curve Loop(2) = {6, 7, -2, 5};
+Curve Loop(2) = {1, -15, 13, 18};
 Plane Surface(2) = {2};
 
-Curve Loop(3) = {3, 4, 1, 2};
+Curve Loop(3) = {16, 13, -17, -8};
 Plane Surface(3) = {3};
 
-//DISCRETIZAÇÃO
-Transfinite Surface {1} = {3, 4, 5, 11};
-Transfinite Surface {2} = {7, 2, 11, 9};
-Transfinite Surface {3} = {1, 7, 9, 6};
+Curve Loop(4) = {7, 16, -14, 11};
+Plane Surface(4) = {4};
 
-Transfinite Curve {1, 3} = wallYElements Using Progression 1;
-Transfinite Curve {5, 7} = jetYElements Using Progression 1;
-Transfinite Curve {4, 2, 6} = wallXElements Using Progression 1;
+Curve Loop(5) = {4, 5, 6, -11};
+Plane Surface(5) = {5};
 
-Transfinite Curve {9, 11} = slipWallYElements+1 Using Progression 1;
-Transfinite Curve {8, 10} = slipWallXElements+1 Using Progression 1;
+Transfinite Surface {5} = {3, 4, 5, 11};
+Transfinite Surface {4} = {12, 3, 11, 9};
+Transfinite Surface {3} = {13, 12, 9, 6};
+Transfinite Surface {2} = {1, 7, 12, 13};
+Transfinite Surface {1} = {7, 2, 3, 12};
 
-Recombine Surface {3, 2, 1};
+// Retirada de dados da malha
+p13[] = Point{13};
+p12[] = Point{12};
+p6[] = Point{6};
+p1[] = Point{1};
 
-//EXTRUSÃO
+line13Length = p12[1] - p13[1];
+line17Length = p6[0]-p13[0];
+line18Length = p13[0]-p1[0];
+line1718Proportion = line17Length/line18Length;
+plane3SideProportions = line17Length/line13Length;
+
+
+elementCoefElementsX = elementCoef;
+elementCoefElementssplitHeight = elementCoefElementsX/plane3SideProportions;
+
+// Dividindo as linhas, aqui estipulei 10% pra suavizar a transição entre as regiões
+Transfinite Curve {1, 13, 8} = elementCoefElementssplitHeight+1 Using Progression 1;
+Transfinite Curve {2, 7, 14} = elementCoefElementssplitHeight*1.10+1 Using Progression 1;
+Transfinite Curve {6, 4} = elementCoefElementssplitHeight*1.10*1.10+1  Using Progression 1;
+
+Transfinite Curve {18, 15, 3} = elementCoefElementsX/line1718Proportion+1 Using Progression 1;
+Transfinite Curve {17, 16, 11, 5} = elementCoefElementsX+1 Using Progression 1;
+
+// Recombinando
+Recombine Surface {5};
+Recombine Surface {4};
+Recombine Surface {3};
+Recombine Surface {2};
+Recombine Surface {1};
+
+// Extrusão
 Extrude {0, 0, dz} {
-  Surface{1}; Surface{2}; Surface{3}; 
+  Surface{5}; Surface{4}; Surface{3}; Surface{2}; Surface{1}; Layers {1}; Recombine;
 }
