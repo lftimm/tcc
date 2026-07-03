@@ -10,6 +10,7 @@ splitHeight = 0.45*Zjet;
 elementCoef = 350;
 
 // GEOMETRIA
+// Face da frente
 Point(1) = {0,0,0,1.0};
 Point(2) = {0,Zjet,0,1.0};
 Point(3) = {0.5*Djet,Zjet,0,1.0};
@@ -31,7 +32,6 @@ Line(5) = {4, 5};
 Line(6) = {5, 11};
 Line(7) = {11, 9};
 Line(8) = {9, 6};
-
 Line(11) = {3, 11};
 Line(13) = {12, 13};
 Line(14) = {3, 12};
@@ -80,7 +80,7 @@ elementCoefElementssplitHeight = elementCoefElementsX/plane3SideProportions;
 // Dividindo as linhas, aqui estipulei 10% pra suavizar a transição entre as regiões
 Transfinite Curve {1, 13, 8} = elementCoefElementssplitHeight+1 Using Progression 1;
 Transfinite Curve {2, 7, 14} = elementCoefElementssplitHeight*1.10+1 Using Progression 1;
-Transfinite Curve {6, 4} = elementCoefElementssplitHeight*1.10*1.10+1  Using Progression 1;
+Transfinite Curve {6, 4} = elementCoefElementssplitHeight*1.1*1.1+1  Using Progression 1;
 
 Transfinite Curve {18, 15, 3} = elementCoefElementsX/line1718Proportion+1 Using Progression 1;
 Transfinite Curve {17, 16, 11, 5} = elementCoefElementsX+1 Using Progression 1;
@@ -96,3 +96,29 @@ Recombine Surface {1};
 Extrude {0, 0, dz} {
   Surface{5}; Surface{4}; Surface{3}; Surface{2}; Surface{1}; Layers {1}; Recombine;
 }
+
+// Grupos Físicos
+// Tolerância para a captura geométrica
+tol = 0.01;
+
+// Identificação das faces geradas pela extrusão nas fronteiras (Baseadas nas coordenadas X, Y, Z)
+surf_wall[] = Surface In BoundingBox{-tol, -tol, -tol, 10*Djet+tol, tol, dz+tol};
+surf_slip[] = Surface In BoundingBox{0.5*Djet-tol, Zjet-tol, -tol, 0.5*Djet+tol, 10*Djet+tol, dz+tol};
+surf_outlet_vert[] = Surface In BoundingBox{10*Djet-tol, -tol, -tol, 10*Djet+tol, 10*Djet+tol, dz+tol};
+surf_outlet_hori[] = Surface In BoundingBox{0.5*Djet-tol, 10*Djet-tol, -tol, 10*Djet+tol, 10*Djet+tol, dz+tol};
+
+surf_jet[] = Surface In BoundingBox{-tol, Zjet-tol, -tol, 0.5*Djet+tol, Zjet+tol, dz+tol};
+surf_axis[] = Surface In BoundingBox{-tol, -tol, -tol, tol, Zjet+tol, dz+tol};
+
+// Identificação dos planos transversais (Z = 0 e Z = dz) para forçar o escoamento 2D
+planos_z0[] = Surface In BoundingBox{-tol, -tol, -tol, 10*Djet+tol, 10*Djet+tol, tol};
+planos_zdz[] = Surface In BoundingBox{-tol, -tol, dz-tol, 10*Djet+tol, 10*Djet+tol, dz+tol};
+todos_volumes[] = Volume "*";
+
+Physical Surface("Wall", 129) = {surf_wall[]};
+Physical Surface("Slip Wall", 130) = {surf_slip[]};
+Physical Surface("Impinging Jet", 131) = {surf_jet[]};
+Physical Surface("Radius center", 132) = {surf_axis[]};
+Physical Surface("Pressure Outlet", 133) = {surf_outlet_hori[],surf_outlet_vert[]};
+Physical Surface("ExtrusionPlanes", 134) = {planos_z0[], planos_zdz[]};
+Physical Volume("Fluid", 135) = {todos_volumes[]};
