@@ -13,7 +13,7 @@
 !	Log = Número de CC do tipo Lei Logarítmica - NÃO IMPLEMENTADO
 ! **********************************
 $GroupCount
-7	11	1	0	0
+6	11	1	0	0
 $EndGroupCount
 ! **********************************
 ! Especificação do tipo de condição de contorno (CC)
@@ -34,20 +34,12 @@ $EndGroupCount
 !		*OBS: Atualmente apenas V1 e V3 podem ter Lei de Potência ou Logaritmica
 ! **********************************
 $GroupType
-
-! Wall
 129	1	1	1	0
-! Slip Wall
 130	0	1	1	0
-! Impinging Jet
 131	1	2	1	0
-! Radius center
 132	1	1	1	0
-! Pressure Outlet
 133	0	0	0	1
-! ExtrusionPlanes
 134	1	1	1	1
-
 $EndGroupType
 ! **********************************
 ! Especificação do valor para CC constante
@@ -70,8 +62,8 @@ $EndConstantValues
 !		*OBS: Os valores devem estar na mesma ordem que estão no $GroupType (linha a linha, esquerda pra direita)
 !		*OBS: Lei de Potência aumenta com y positivo
 ! **********************************
-$PowerLawValues
-$EndPowerLawValues
+! $PowerLawValues
+! $EndPowerLawValues
 ! **********************************
 ! Especificação do valor para CC por Lei Logarítmica
 !	Formato:
@@ -83,8 +75,8 @@ $EndPowerLawValues
 !		*OBS: A constante de Von Kármán k é adotada como 0,4
 !		*OBS: Lei Logarítmica aumenta com y positivo
 ! **********************************
-$LogLawValues
-$EndLogLawValues
+! $LogLawValues
+! $EndLogLawValues
 ! **********************************
 ! Número de objetos submersos no modelo
 ! 	Formato:
@@ -92,7 +84,7 @@ $EndLogLawValues
 !	N = Número total de objetos submersos
 ! **********************************
 $ObjectCount
-    0   
+0   
 $EndObjectCount
 ! **********************************
 ! Propriedades dos objetos submersos no modelo
@@ -101,8 +93,8 @@ $EndObjectCount
 !	Group = Número do grupo físico ao qual o objeto pertence
 !		*OBS: Um objeto não pode pertencer a mais de um grupo físico
 ! **********************************
-$ObjectProp
-$EndObjectProp
+! $ObjectProp
+! $EndObjectProp
 ! **********************************
 ! Apresenta o número do grupo usado como base para o campo inicial de velocidade e pressão
 ! Neste caso, CC livres são tratadas como nulas
@@ -110,16 +102,16 @@ $EndObjectProp
 !		Group
 !	Group = Número do grupo físico usado como referência para os campos iniciais
 ! **********************************
-$InitialFieldGroup
-135
-$EndInitialFieldGroup
+! $InitialFieldGroup
+! 135
+! $EndInitialFieldGroup
 ! **********************************
 ! Apresenta o número do grupo onde há turbulência na entrada
 !	Formato:
 !		Group
 !	Group = Número do grupo físico onde há turbulência
 ! **********************************
-$InflowTurbGroup
-$EndInflowTurbGroup
+! $InflowTurbGroup
+! $EndInflowTurbGroup
 ! É sempre necessário ter um $End no final do arquivo pro algoritmo saber onde parar
 $End

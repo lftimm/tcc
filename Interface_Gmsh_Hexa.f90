@@ -236,6 +236,7 @@ program Interface_Gmsh_Hexa
     write(*,1) '	Sim = 1'
     read(*,*) n1
     if (n1.eq.0) then
+        write(*,1) '[DEBUG] ZERO transporte'
         RHA = .FALSE.
     else
         RHA = .TRUE.

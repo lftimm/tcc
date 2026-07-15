@@ -1252,12 +1252,14 @@ program Interface_Gmsh_Hexa
 	
 	j = 0
 	k1 = 0
-	do i=1,ntn
+
+	do i=1, ntn
 		if (NEIBOR(i) .gt. j) then
 			j = NEIBOR(i)
 			k1 = i
 		end if
 	end do
+
 	write(*, 200) j
 	write(*, 200) k1
 	

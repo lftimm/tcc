@@ -1,8 +1,8 @@
 // CONFIGURAÇÕES
-dz = 0.1;
 Djet = 0.0381;
 Zjet = 4*Djet;
 splitHeight = 0.45*Zjet;
+dz = Djet/10;
 
 // Aqui usei este valor como o governante no tamanho da malha
 // Defini mais ou menos o tamanho da região onde ocorrem os vórtices
