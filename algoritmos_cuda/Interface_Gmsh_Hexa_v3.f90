@@ -1,8 +1,8 @@
 module functions
     contains
-!***********************************************************
-!			FUNÇÕES
-!***********************************************************
+    !***********************************************************
+    !			FUNÇÕES
+    !***********************************************************
     
 	function PowerLaw(z, Vref, zd, zref, p) result(V)
 
@@ -89,34 +89,34 @@ program Interface_Gmsh_Hexa
     !**********************************************************************
     
     !*** CONSOLE ***!
-1   FORMAT (A,T80)		! formato para escrever no cmd
+    FORMAT (A,T80)		! formato para escrever no cmd
     
     !*** INICIA.PAR E PNAME.PRO ***!
-2   FORMAT (A,T10,A,T6)		! formato para nome do projeto OpenMP
-3   FORMAT (A,T10,I19)		! formato para inteiro do projeto OpenMP
-4   FORMAT (A,T10,D20.12)	! formato para real do projeto OpenMP
-5   FORMAT (A,T10,3D20.12)  ! formato para três reais do projeto OpenMP
-6   FORMAT (A,T6)			! formato para nome do projeto CUDA
-7   FORMAT (I19)			! formato para inteiro do projeto CUDA
-8   FORMAT (D20.12)			! formato para real do projeto CUDA
-9   FORMAT (3D20.12)		! formato para três reais do projeto CUDA
-10  FORMAT (2I19)			! formato para dois inteiros do projeto CUDA
+    FORMAT (A,T10,A,T6)		! formato para nome do projeto OpenMP
+    FORMAT (A,T10,I19)		! formato para inteiro do projeto OpenMP
+    FORMAT (A,T10,D20.12)	! formato para real do projeto OpenMP
+    FORMAT (A,T10,3D20.12)  ! formato para três reais do projeto OpenMP
+    FORMAT (A,T6)			! formato para nome do projeto CUDA
+    FORMAT (I19)			! formato para inteiro do projeto CUDA
+    FORMAT (D20.12)			! formato para real do projeto CUDA
+    FORMAT (3D20.12)		! formato para três reais do projeto CUDA
+    FORMAT (2I19)			! formato para dois inteiros do projeto CUDA
     
     !*** ARQUIVOS DE SAÍDA ***!
-11  FORMAT (I10)			! formato para inteiro, usado para armazenar contadores
-12  FORMAT (3D20.12)		! formato para 3 números decimais, usado nas coordenadas dos nós e no campo de velocidades
-13  FORMAT (2D20.12)		! formato para 2 números decimais, usado nos campos de pressão, temperatura e espécie
-14  FORMAT (8I10)			! formato para armazenamento das conectividades dos elementos, 8 números inteiros com até 9 dígitos
-15  FORMAT (I10, D20.12)	! formato para inteiro e real, usado nos arquivos CC
-16  FORMAT (D20.12, 4I10)	! formato para real e 4 inteiros, usado nos arquivos CS
-17	FORMAT (I10, 3D20.12)	! formato para inteiro e 3 reais, usado nos arquivos CS    
-18  FORMAT (D20.12)			! formato para 1 número decimal, usado para arquivos FF, CC e CE quando zerados
+    FORMAT (I10)			! formato para inteiro, usado para armazenar contadores
+    FORMAT (3D20.12)		! formato para 3 números decimais, usado nas coordenadas dos nós e no campo de velocidades
+    FORMAT (2D20.12)		! formato para 2 números decimais, usado nos campos de pressão, temperatura e espécie
+    FORMAT (8I10)			! formato para armazenamento das conectividades dos elementos, 8 números inteiros com até 9 dígitos
+    FORMAT (I10, D20.12)	! formato para inteiro e real, usado nos arquivos CC
+    FORMAT (D20.12, 4I10)	! formato para real e 4 inteiros, usado nos arquivos CS
+    FORMAT (I10, 3D20.12)	! formato para inteiro e 3 reais, usado nos arquivos CS    
+    FORMAT (D20.12)			! formato para 1 número decimal, usado para arquivos FF, CC e CE quando zerados
     
     !*** PROGRESSO ***!
-100 FORMAT (I10, ' de ', I10, ' quads | ' I10, ' de ', I10, ' hexas | ', F10.2, '%')
+    FORMAT (I10, ' de ', I10, ' quads | ' I10, ' de ', I10, ' hexas | ', F10.2, '%')
 
-	!*** NEIBOR ***!
-200 FORMAT ('NEIBOR - ', I10)
+    !*** NEIBOR ***!
+    FORMAT ('NEIBOR - ', I10)
     
     !**********************************************************************
     ! DECLARAÇÃO DAS VARIÁVEIS DO PROGRAMA
@@ -151,7 +151,6 @@ program Interface_Gmsh_Hexa
 	integer :: NB1, NB2
 	integer :: inflowTurbGroup
     
-
 	integer :: quadnodes(4)					! vetor auxiliar com os nós de um elementos quadrilatero
 	
     integer, allocatable :: nccV1potnodes(:), nccV2potnodes(:)	! vetores com os nós com CC por lei de potência
@@ -348,11 +347,13 @@ program Interface_Gmsh_Hexa
 			end do
 			
 			read (101,*) garbc	! $EndLogLawValues
+
 		case ('$ObjectCount')
 			! Armazenar o número de objetos submersos MNOBJ
 			read (101,*) MNOBJ
 			allocate ( OBJPhysGroup(MNOBJ) )
 			read (101,*) garbc	! $EndObjectCount
+
 		case ('$ObjectProp')
 			! Armazenar o número dos grupos físicos de cada objeto submerso
 			do i=1,MNOBJ
@@ -360,11 +361,12 @@ program Interface_Gmsh_Hexa
 			end do
 			
 			read (101,*) garbc	! $EndObjectProp
+
 		case ('$InitialFieldGroup')
 			! Armazenar o número do grupo físico com as CC correspondentes ao campo inicial
 			read (101,*) initialFieldGroup
-			
 			read (101,*) garbc	! $EndInitialFieldGroup
+
 		case ('$InflowTurbGroup')
 			! Armazenar o número do grupo físico com turbulência na entrada
 			read (101,*) inflowTurbGroup
@@ -680,6 +682,7 @@ program Interface_Gmsh_Hexa
 					CSsupELEM(MNOBJ,nquad), CSsupKONE(MNOBJ,nquad,4), &
 					CSsupAREA(MNOBJ,nquad), CSsupCOUNT(MNOBJ), &
 					CSnnnNODE(MNOBJ,ntn), CSnnnNORM(MNOBJ,ntn,3), inflowNodes(ntn) )
+
             nccV1potnodes = 0
             nccV2potnodes = 0
             vccV1potnodes = 0
@@ -743,9 +746,9 @@ program Interface_Gmsh_Hexa
 						
 					call AddNewCCNodes(ntn, nV1nodes, 4, nccV1nodes, quadnodes)
                     call UpdateUniformCCValues(ntn, nccV1nodes, quadnodes, valueConstCC(j), vccV1nodes)
+
 				case (3)
 					! CC Potência
-					
 					! Verificar se os nós ja estao na lista
 					quadnodes(1) = n1
 					quadnodes(2) = n2
@@ -767,7 +770,6 @@ program Interface_Gmsh_Hexa
                     call UpdatePowerLawCCValues(ntn, nccV1potnodes, n4, zz(n4), valuePowerCC(j,:), vccV1potnodes)
 				case (4)
 					! CC Log
-					
 					! Verificar se os nós ja estao na lista
 					quadnodes(1) = n1
 					quadnodes(2) = n2
@@ -785,6 +787,7 @@ program Interface_Gmsh_Hexa
                     call UpdateLogLawCCValues(ntn, nccV1lognodes, n2, zz(n2), valueLogCC(j,:), vccV1lognodes)
                     call UpdateLogLawCCValues(ntn, nccV1lognodes, n3, zz(n3), valueLogCC(j,:), vccV1lognodes)
                     call UpdateLogLawCCValues(ntn, nccV1lognodes, n4, zz(n4), valueLogCC(j,:), vccV1lognodes)
+
 				end select
                 
 				! V2
@@ -800,6 +803,7 @@ program Interface_Gmsh_Hexa
 						
 					call AddNewCCNodes(ntn, nV2nodes, 4, nccV2nodes, quadnodes)
                     call UpdateUniformCCValues(ntn, nccV2nodes, quadnodes, 0.0d0, vccV2nodes)
+
 				case (2)
 					! CC Constante
 					
@@ -840,9 +844,9 @@ program Interface_Gmsh_Hexa
                     call UpdatePowerLawCCValues(ntn, nccV2potnodes, n2, zz(n2), valuePowerCC(j,:), vccV2potnodes)
                     call UpdatePowerLawCCValues(ntn, nccV2potnodes, n3, zz(n3), valuePowerCC(j,:), vccV2potnodes)
                     call UpdatePowerLawCCValues(ntn, nccV2potnodes, n4, zz(n4), valuePowerCC(j,:), vccV2potnodes)
+
 				case (4)
 					! CC Log
-					
 					! Verificar se os nós ja estao na lista
 					quadnodes(1) = n1
 					quadnodes(2) = n2
@@ -860,13 +864,13 @@ program Interface_Gmsh_Hexa
                     call UpdateLogLawCCValues(ntn, nccV2lognodes, n2, zz(n2), valueLogCC(j,:), vccV2lognodes)
                     call UpdateLogLawCCValues(ntn, nccV2lognodes, n3, zz(n3), valueLogCC(j,:), vccV2lognodes)
                     call UpdateLogLawCCValues(ntn, nccV2lognodes, n4, zz(n4), valueLogCC(j,:), vccV2lognodes)
+
 				end select
 				
 				! V3
 				select case (indexCC(group,4))
 				case (1)
 					! CC Nula
-					
 					! Verificar se os nós ja estao na lista
 					quadnodes(1) = n1
 					quadnodes(2) = n2
@@ -877,7 +881,6 @@ program Interface_Gmsh_Hexa
                     call UpdateUniformCCValues(ntn, nccV3nodes, quadnodes, 0.0d0, vccV3nodes)
 				case (2)
 					! CC Constante
-					
 					! Verificar se os nós ja estao na lista
 					quadnodes(1) = n1
 					quadnodes(2) = n2
@@ -892,13 +895,13 @@ program Interface_Gmsh_Hexa
 						
 					call AddNewCCNodes(ntn, nV3nodes, 4, nccV3nodes, quadnodes)
 					call UpdateUniformCCValues(ntn, nccV3nodes, quadnodes, valueConstCC(j), vccV3nodes)
+
 				end select
                 
 				! P
 				select case (indexCC(group,5))
 				case (1)
 					! CC Nula
-					
 					! Verificar se os nós ja estao na lista
 					quadnodes(1) = n1
 					quadnodes(2) = n2
@@ -909,7 +912,6 @@ program Interface_Gmsh_Hexa
                     call UpdateUniformCCValues(ntn, nccPnodes, quadnodes, 0.0d0, vccPnodes)
 				case (2)
 					! CC Constante
-					
 					! Verificar se os nós ja estao na lista
 					quadnodes(1) = n1
 					quadnodes(2) = n2

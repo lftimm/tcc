@@ -34,13 +34,20 @@ $EndGroupCount
 !		*OBS: Atualmente apenas V1 e V3 podem ter Lei de Potência ou Logaritmica
 ! **********************************
 $GroupType
+
+! Wall
 129	1	1	1	0
-130	1	1	0	0
-131	1	1	2	0
-132	1	1	0	0
+! Slip Wall
+130	0	1	1	0
+! Impinging Jet
+131	1	2	1	0
+! Radius center
+132	1	1	1	0
+! Pressure Outlet
 133	0	0	0	1
-134	0	1	0	0
-135	0	0	0	0
+! ExtrusionPlanes
+134	1	1	1	1
+
 $EndGroupType
 ! **********************************
 ! Especificação do valor para CC constante
@@ -50,7 +57,7 @@ $EndGroupType
 !		*OBS: Os valores devem estar na mesma ordem que estão no $GroupType (linha a linha, esquerda pra direita)
 ! **********************************
 $ConstantValues
--29.0
+-8.15
 $EndConstantValues
 ! **********************************
 ! Especificação do valor para CC por Lei de Potência
@@ -64,7 +71,6 @@ $EndConstantValues
 !		*OBS: Lei de Potência aumenta com y positivo
 ! **********************************
 $PowerLawValues
-0.0d0	0.0d0	0.0d0	0.0d0
 $EndPowerLawValues
 ! **********************************
 ! Especificação do valor para CC por Lei Logarítmica
@@ -86,6 +92,7 @@ $EndLogLawValues
 !	N = Número total de objetos submersos
 ! **********************************
 $ObjectCount
+    0   
 $EndObjectCount
 ! **********************************
 ! Propriedades dos objetos submersos no modelo
@@ -113,7 +120,6 @@ $EndInitialFieldGroup
 !	Group = Número do grupo físico onde há turbulência
 ! **********************************
 $InflowTurbGroup
-0
 $EndInflowTurbGroup
 ! É sempre necessário ter um $End no final do arquivo pro algoritmo saber onde parar
 $End

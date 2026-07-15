@@ -1,6 +1,6 @@
 // CONFIGURAÇÕES
 dz = 0.1;
-Djet = 1;
+Djet = 0.0381;
 Zjet = 4*Djet;
 splitHeight = 0.45*Zjet;
 
