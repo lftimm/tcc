@@ -147,7 +147,7 @@ contains
 			uvwprom(3,ielem)= sum(uvwp(:,3))*0.125D0
 			
 		end if 
-		call syncthreads()	
+	call syncthreads()	
 	end subroutine laco_1
 	
 	!!! La�o 3 - Modelo Din�mico de Smagorinsky
@@ -205,7 +205,7 @@ contains
 			Pij6(IELEM) = Aux1*Sij(6)*VOLU1 
 
 		end if 
-		call syncthreads()	
+	call syncthreads()	
 	end subroutine dynamic_1
 	
 	!!! La�o 4 - Modelo Din�mico
@@ -258,7 +258,7 @@ contains
 						Pij6(K70C)+Pij6(K80C))/mlum(I)
 						
 		end if 
-		call syncthreads()	
+	call syncthreads()	
 	end subroutine dynamic_2
 
 	attributes(global) subroutine dynamic_3(ndsup, Psij, NDDist, uvw, uvwf, Pfij)
@@ -469,135 +469,133 @@ contains
 	end subroutine dynamic_5	
 
 	attributes(global) subroutine dynamic_6(uvw, ndsup, NDDIST, uvwf, Sfij, Psij, Filtr2, Cxt)
-		implicit none 
-		integer			:: ndsup(:,:)
-		real(4)			:: uvw(:,:), uvwf(:,:), NDDIST(:,:), Sfij(:,:), Psij(:,:)
-		real(4)			:: Cxt(:), Filtr2(:)
-		! 
-		real*8, device	:: DistB(12), uu(12), vv(12), ww(12), Sij(6) 
-		real*8, device  :: UUfa, VVfa, WWfa, UVfa, UWfa,VWfa, SL11, SL22, SL33, SL12, SL13, SL23, &
-						   SM11, SM22, SM33, SM12, SM13, SM23
-		real*8, device	:: Sfmod, FILTR4, Snum, Sden, Dtot
-		integer, device :: CONT, I, J, JJ
+	implicit none 
+	integer			:: ndsup(:,:)
+	real(4)			:: uvw(:,:), uvwf(:,:), NDDIST(:,:), Sfij(:,:), Psij(:,:)
+	real(4)			:: Cxt(:), Filtr2(:)
+	! 
+	real*8, device	:: DistB(12), uu(12), vv(12), ww(12), Sij(6) 
+	real*8, device  :: UUfa, VVfa, WWfa, UVfa, UWfa,VWfa, SL11, SL22, SL33, SL12, SL13, SL23, &
+					   SM11, SM22, SM33, SM12, SM13, SM23
+	real*8, device	:: Sfmod, FILTR4, Snum, Sden, Dtot
+	integer, device :: CONT, I, J, JJ
 	
-		I = (blockIdx%x-1)*blockDim%x + threadIdx%x
-		CONT = size(uvw,2)
+	I = (blockIdx%x-1)*blockDim%x + threadIdx%x
+	CONT = size(uvw,2)
 	
-		if (I <= CONT)	then	
-			DistB = 0.0d0; uu = 0.0d0; vv = 0.0d0; ww = 0.0d0;
+	if (I <= CONT)	then	
 	
- 		  do j = 1,12
- 		  	jj=ndsup(j,i)
- 		    if(jj.ne.0) then
- 		    	uu(j)=uvw(1,jj)
- 		      vv(j)=uvw(2,jj)
-			    ww(j)=uvw(3,jj)
-			    DistB(j)=1.0D0/NDDIST(j,I)
- 		    end if
-						 
-			end do
- 		  Dtot = sum(DistB)
- 		  UUfa = dot_product(uu*uu,DistB)/Dtot
- 		  VVfa = dot_product(vv*vv,DistB)/Dtot
- 		  WWfa = dot_product(ww*ww,DistB)/Dtot
- 		  UVfa = dot_product(uu*vv,DistB)/Dtot
- 		  UWfa = dot_product(uu*ww,DistB)/Dtot
- 		  VWfa = dot_product(vv*ww,DistB)/Dtot
+	DistB = 0.0d0; uu = 0.0d0; vv = 0.0d0; ww = 0.0d0;
+	
+          do j = 1,12
+            jj=ndsup(j,i)
+            if(jj.ne.0) then
+              uu(j)=uvw(1,jj)
+              vv(j)=uvw(2,jj)
+	          ww(j)=uvw(3,jj)
+	          DistB(j)=1.0D0/NDDIST(j,I)
+            end if
+		
+	      end do
+          Dtot = sum(DistB)
+          UUfa = dot_product(uu*uu,DistB)/Dtot
+          VVfa = dot_product(vv*vv,DistB)/Dtot
+          WWfa = dot_product(ww*ww,DistB)/Dtot
+          UVfa = dot_product(uu*vv,DistB)/Dtot
+          UWfa = dot_product(uu*ww,DistB)/Dtot
+          VWfa = dot_product(vv*ww,DistB)/Dtot
+!         ***** Fator de pondera��o segundo Silveira Neto (p):
+          !UUf = UUfa; VVf = VVfa; WWf = WWfa; UVf = UVfa; UWf = UWfa; VWf = VWfa 
+!         ***** Determina��o das componentes do tensor de Leonard Lij em n�vel nodal: 
+          SL11 = UUfa - (uvwf(1,I)*Uvwf(1,I))
+          SL22 = VVfa - (uVwf(2,I)*uVwf(2,I))
+          SL33 = WWfa - (uvWf(3,I)*uvWf(3,I))
+          SL12 = UVfa - (Uvwf(1,I)*uVwf(2,I))
+          SL13 = UWfa - (Uvwf(1,I)*uvWf(3,I))
+          SL23 = VWfa - (uVwf(2,I)*uvWf(3,I))
 
-			!***** Fator de pondera��o segundo Silveira Neto (p):
- 		         !UUf = UUfa; VVf = VVfa; WWf = WWfa; UVf = UVfa; UWf = UWfa; VWf = VWfa 
-			!***** Determina��o das componentes do tensor de Leonard Lij em n�vel nodal: 
- 		  SL11 = UUfa - (uvwf(1,I)*Uvwf(1,I))
- 		  SL22 = VVfa - (uVwf(2,I)*uVwf(2,I))
- 		  SL33 = WWfa - (uvWf(3,I)*uvWf(3,I))
- 		  SL12 = UVfa - (Uvwf(1,I)*uVwf(2,I))
- 		  SL13 = UWfa - (Uvwf(1,I)*uvWf(3,I))
- 		  SL23 = VWfa - (uVwf(2,I)*uvWf(3,I))
+!         *****  Aplica��o das condi��es de contorno sobre os tensores de segundo filtro SLij:
+!         --> Todas as componentes do tensor ser�o anuladas para n�s pertencentes a 
+!         *****    superf�cies s�lidas (paredes e/ou corpos imersos, ambos fixos).
+          IF(((uvw(1,I).EQ.0.0D0).AND.(uvw(2,I).EQ.0.0D0).AND. (uvw(3,I).EQ.0.0D0))) THEN
+            SL11 = 0.0D0; SL22 = 0.0D0; SL33 = 0.0D0;
+            SL12 = 0.0D0; SL13 = 0.0D0; SL23 = 0.0D0
+          end if
+          ! componentes do tensor taxa de deforma��o de segundo filtro, nodal
+          Sij(1) = Sfij(1,I)
+          Sij(2) = Sfij(2,I)
+          Sij(3) = Sfij(3,I)
+          Sij(4) = Sfij(4,I)
+          Sij(5) = Sfij(5,I)
+          Sij(6) = Sfij(6,I)
+		    
+          ! m�dulo do tensor taxa de deforma��o de segundo filtro, nodal:
+          Sfmod = dsqrt(2.0d0*(Sij(1)*Sij(1) + Sij(4)*Sij(4) + Sij(6)*Sij(6) + &
+                        2.0d0*(Sij(2)*Sij(2) + Sij(3)*Sij(3) + Sij(5)*Sij(5))))
+!         ***** C�lculo do Tensor Mij:
+          filtr4 = filtr2(i)*filtr2(i)*Sfmod  
+          SM11 = filtr4 * Sij(1)
+          SM22 = filtr4 * Sij(4)
+          SM33 = filtr4 * Sij(6)
+          SM12 = filtr4 * Sij(2)
+          SM13 = filtr4 * Sij(3)
+          SM23 = filtr4 * Sij(5)
+          ! componentes do produto (Filtro1**2)*|Sij|*Sij em segundo filtro, nodal
+          Sij(1) = Psij(1,I)
+          Sij(2) = Psij(2,I)
+          Sij(3) = Psij(3,I)
+          Sij(4) = Psij(4,I)
+          Sij(5) = Psij(5,I)
+          Sij(6) = Psij(6,I)
+          SM11 = SM11 - Sij(1)
+          SM22 = SM22 - Sij(4)
+          SM33 = SM33 - Sij(6)
+          SM12 = SM12 - Sij(2)
+          SM13 = SM13 - Sij(3)
+          SM23 = SM23 - Sij(5)
+		  
+!         *****  C�lculo do coeficiente de Smagorinsky Din�mico - C(x,t):           
+          Snum = SL11*SM11+SL22*SM22+SL33*SM33+2.0D0*SL12*SM12+2.0D0*SL13*SM13+2.0D0*SL23*SM23
+          Sden = SM11*sm11+SM22*sm22+SM33*sm33+2.0D0*(SM12*sm12+SM13*sm13+SM23*sm23) 
 
-			!*****  Aplica��o das condi��es de contorno sobre os tensores de segundo filtro SLij:
-			!--> Todas as componentes do tensor ser�o anuladas para n�s pertencentes a 
-			!*****    superf�cies s�lidas (paredes e/ou corpos imersos, ambos fixos).
- 		  IF(((uvw(1,I).EQ.0.0D0).AND.(uvw(2,I).EQ.0.0D0).AND. (uvw(3,I).EQ.0.0D0))) THEN
- 		  	SL11 = 0.0D0; SL22 = 0.0D0; SL33 = 0.0D0;
- 		    SL12 = 0.0D0; SL13 = 0.0D0; SL23 = 0.0D0
- 		  end if
-
- 		  ! componentes do tensor taxa de deforma��o de segundo filtro, nodal
- 		  Sij(1) = Sfij(1,I)
- 		  Sij(2) = Sfij(2,I)
- 		  Sij(3) = Sfij(3,I)
- 		  Sij(4) = Sfij(4,I)
- 		  Sij(5) = Sfij(5,I)
- 		  Sij(6) = Sfij(6,I)
-					 
- 		  ! m�dulo do tensor taxa de deforma��o de segundo filtro, nodal:
- 		  Sfmod = dsqrt(2.0d0*(Sij(1)*Sij(1) + Sij(4)*Sij(4) + Sij(6)*Sij(6) + &
- 		  	2.0d0*(Sij(2)*Sij(2) + Sij(3)*Sij(3) + Sij(5)*Sij(5))))
-
-			!***** C�lculo do Tensor Mij:
- 		  filtr4 = filtr2(i)*filtr2(i)*Sfmod  
- 		  SM11 = filtr4 * Sij(1)
- 		  SM22 = filtr4 * Sij(4)
- 		  SM33 = filtr4 * Sij(6)
- 		  SM12 = filtr4 * Sij(2)
- 		  SM13 = filtr4 * Sij(3)
- 		  SM23 = filtr4 * Sij(5)
-
- 		  ! componentes do produto (Filtro1**2)*|Sij|*Sij em segundo filtro, nodal
- 		  Sij(1) = Psij(1,I)
- 		  Sij(2) = Psij(2,I)
- 		  Sij(3) = Psij(3,I)
- 		  Sij(4) = Psij(4,I)
- 		  Sij(5) = Psij(5,I)
- 		  Sij(6) = Psij(6,I)
- 		  SM11 = SM11 - Sij(1)
- 		  SM22 = SM22 - Sij(4)
- 		  SM33 = SM33 - Sij(6)
- 		  SM12 = SM12 - Sij(2)
- 		  SM13 = SM13 - Sij(3)
- 		  SM23 = SM23 - Sij(5)
-					 
-			!*****  C�lculo do coeficiente de Smagorinsky Din�mico - C(x,t):           
- 		  Snum = SL11*SM11+SL22*SM22+SL33*SM33+2.0D0*SL12*SM12+2.0D0*SL13*SM13+2.0D0*SL23*SM23
- 		  Sden = SM11*sm11+SM22*sm22+SM33*sm33+2.0D0*(SM12*sm12+SM13*sm13+SM23*sm23) 
-
- 		  IF(Sden.EQ.0.0D0) THEN
- 		  	Cxt(I) = 0.0D0
- 		  ELSE
- 		  	Cxt(I)	= -0.5D0 * (Snum/Sden)
- 		  end if
-		end if 
-		call syncthreads()	
+          IF(Sden.EQ.0.0D0) THEN
+            Cxt(I) = 0.0D0
+          ELSE
+            Cxt(I)	= -0.5D0 * (Snum/Sden)
+          end if
+		  
+	end if 
+	call syncthreads()	
 	end subroutine dynamic_6
 	
 	attributes(global) subroutine dynamic_7(VDTurb, Cxt, FILTR1, SmodE, KONE)
-		implicit none 
-		integer			:: KONE(:)
-		real(4)			:: VDTurb(:) 
-		real(4)			:: Cxt(:), Filtr1(:), SmodE(:)
-		! 
-		integer, device :: CONT, IELEM, IE, NE1, NE2, NE3, NE4, NE5, NE6, NE7, NE8
+	implicit none 
+	integer			:: KONE(:)
+	real(4)			:: VDTurb(:) 
+	real(4)			:: Cxt(:), Filtr1(:), SmodE(:)
+	! 
+	integer, device :: CONT, IELEM, IE, NE1, NE2, NE3, NE4, NE5, NE6, NE7, NE8
 	
-		IELEM = (blockIdx%x-1)*blockDim%x + threadIdx%x
-		CONT = size(SmodE)
+	IELEM = (blockIdx%x-1)*blockDim%x + threadIdx%x
+	CONT = size(SmodE)
 	
-		if (IELEM <= CONT)	then
+	if (IELEM <= CONT)	then
 	
-			  IE = 8*(IELEM-1)
- 	         NE1=KONE(IE+1)
- 	         NE2=KONE(IE+2)
- 	         NE3=KONE(IE+3)
- 	         NE4=KONE(IE+4)
- 	         NE5=KONE(IE+5)
- 	         NE6=KONE(IE+6)
- 	         NE7=KONE(IE+7)
- 	         NE8=KONE(IE+8)
+		  IE = 8*(IELEM-1)
+          NE1=KONE(IE+1)
+          NE2=KONE(IE+2)
+          NE3=KONE(IE+3)
+          NE4=KONE(IE+4)
+          NE5=KONE(IE+5)
+          NE6=KONE(IE+6)
+          NE7=KONE(IE+7)
+          NE8=KONE(IE+8)
 
- 	         VDTurb(IELEM) = 0.125D0*(Cxt(NE1)+Cxt(NE2)+Cxt(NE3)+Cxt(NE4)+Cxt(NE5)+Cxt(NE6) +&
- 	                                  Cxt(NE7)+Cxt(NE8))*(FILTR1(IELEM)*FILTR1(IELEM))*SmodE(IELEM)	
-
-		end if 
-		call syncthreads()	
+          VDTurb(IELEM) = 0.125D0*(Cxt(NE1)+Cxt(NE2)+Cxt(NE3)+Cxt(NE4)+Cxt(NE5)+Cxt(NE6) +&
+                                   Cxt(NE7)+Cxt(NE8))*(FILTR1(IELEM)*FILTR1(IELEM))*SmodE(IELEM)	
+								   
+	end if 
+	call syncthreads()	
 	end subroutine dynamic_7
 	
 	!!! La�o 10
@@ -837,120 +835,120 @@ contains
 	attributes (global) subroutine laco_11(KONE, IEL, uvw, cnorm, uvwprom, pp, ff1f, ff2f, ff3f, &
 										   AREAC, FCONTOR, VDTurb, Delt, ViscCin, ViscVol, RHOInf, &
 										   NNEqMom, LCONTCARA)
-		implicit none
-		integer				:: KONE(:), IEL(J)			
-		integer				:: NNEqMom, LCONTCARA
-		real(4) 			:: uvw(:,:), cnorm(:,:), uvwprom(:,:), pp(:,:), ff1f(:,:), ff2f(:,:), ff3f(:,:)
-		real(4) 			:: AREAC(:), FCONTOR(:), VDTurb(:)	  
-		real(4)				:: Delt, ViscCin, ViscVol, RHOInf 
-		!!! Vari�veis do device
-		real(4), device		:: NK(8), uvwp(8,4), cnort(3,8) 
-		real(4), device		:: PRmd, auxv, AUX1, AUX2, AUX3, AUX12, AUX13, AUX23, COEF1, COEF2, COEF3, &
-							   FF1, FF2, FF3, D11c, D22c, D33c, D12c, D21c, D13c, D31c, D23c, D32c 
-		integer, device		:: II, III, J, JJ, CONT, IELEM
+	implicit none
+	integer				:: KONE(:), IEL(J)			
+	integer				:: NNEqMom, LCONTCARA
+	real(4) 			:: uvw(:,:), cnorm(:,:), uvwprom(:,:), pp(:,:), ff1f(:,:), ff2f(:,:), ff3f(:,:)
+	real(4) 			:: AREAC(:), FCONTOR(:), VDTurb(:)	  
+	real(4)				:: Delt, ViscCin, ViscVol, RHOInf 
+	!!! Vari�veis do device
+	real(4), device		:: NK(8), uvwp(8,4), cnort(3,8) 
+	real(4), device		:: PRmd, auxv, AUX1, AUX2, AUX3, AUX12, AUX13, AUX23, COEF1, COEF2, COEF3, &
+						   FF1, FF2, FF3, D11c, D22c, D33c, D12c, D21c, D13c, D31c, D23c, D32c 
+	integer, device		:: II, III, J, JJ, CONT, IELEM
 	
-		J = (blockIdx%x-1)*blockDim%x + threadIdx%x
-		!CONT = size(LCONTCARA)							! N�MERO DE N�S (NNM)
+	J = (blockIdx%x-1)*blockDim%x + threadIdx%x
+	!CONT = size(LCONTCARA)							! N�MERO DE N�S (NNM)
 	
-		if (J <= LCONTCARA) then	
-
- 	   IELEM=IEL(J)
- 	   III= (J-1)*8 
- 
- 	   NK(1)= AREAC(J)*FCONTOR(III+1)
- 	   NK(2)= AREAC(J)*FCONTOR(III+2)
- 	   NK(3)= AREAC(J)*FCONTOR(III+3)
- 	   NK(4)= AREAC(J)*FCONTOR(III+4)
- 	   NK(5)= AREAC(J)*FCONTOR(III+5)
- 	   NK(6)= AREAC(J)*FCONTOR(III+6)
- 	   NK(7)= AREAC(J)*FCONTOR(III+7)
- 	   NK(8)= AREAC(J)*FCONTOR(III+8)
+	if (J <= LCONTCARA) then	
 		
- 	   II= (IELEM-1)*8
-
- 	   do jj=1,8
- 	     cnort(1,jj)=cnorm(1,kone(ii+jj))
- 	     cnort(2,jj)=cnorm(2,kone(ii+jj))
- 	     cnort(3,jj)=cnorm(3,kone(ii+jj))
- 	   end do
-		
- 	   do jj=1,8
- 	     uvwp(jj,4)=uvw(4,kone(ii+jj))
- 	   end do
-
-		 !	   Pressao media no elemento
- 	   PRmd = sum(uvwp(:,4))*0.125D0
-
-		 !	   Constantes do tensor de balanco difusivo
- 	   AUX1 = Delt*0.25D0*uvwprom(1,ielem)*uvwprom(1,ielem)
- 	   AUX2 = Delt*0.25D0*uvwprom(2,ielem)*uvwprom(2,ielem)
- 	   AUX3 = Delt*0.25D0*uvwprom(3,ielem)*uvwprom(3,ielem)
- 	   AUX12 = Delt*0.25D0*uvwprom(1,ielem)*uvwprom(2,ielem)
- 	   AUX13 = Delt*0.25D0*uvwprom(1,ielem)*uvwprom(3,ielem)
- 	   AUX23 = Delt*0.25D0*uvwprom(2,ielem)*uvwprom(3,ielem)
-
-		  !	   *******************************************************************************
-		  !	   ********* CONSTANTES DE DIFUS�O - TERMOS DE CONTORNO(PASSO 1) !XXXXalterado 12.09.11
-		  !	   *******************************************************************************
-		  auxv = (ViscCin + VDTurb(IELEM))
-		
-		 IF(auxv.LT.1.00D0*ViscCin) auxv = 1.00D0*ViscCin						
-
- 	   COEF1= 2.0D0 * auxv + ViscVol
- 	   COEF2= auxv 
- 	   COEF3= ViscVol						                    
-
-			!	   ********************************************************************************
-			!	     Termos de contorno da eq. de momentum			PASSO 1)		!XXXX 08.07.11
-			!	   ********************************************************************************
-			if (NNEqMom/=0) then											!XXXX 08.07.11
-			do jj=1,8
+    IELEM=IEL(J)
+    III= (J-1)*8 
  
-				IF (FCONTOR(III+jj)/=0.0D0)	THEN
+    NK(1)= AREAC(J)*FCONTOR(III+1)
+    NK(2)= AREAC(J)*FCONTOR(III+2)
+    NK(3)= AREAC(J)*FCONTOR(III+3)
+    NK(4)= AREAC(J)*FCONTOR(III+4)
+    NK(5)= AREAC(J)*FCONTOR(III+5)
+    NK(6)= AREAC(J)*FCONTOR(III+6)
+    NK(7)= AREAC(J)*FCONTOR(III+7)
+    NK(8)= AREAC(J)*FCONTOR(III+8)
+       
+    II= (IELEM-1)*8
 
-				D11c = ( COEF1 + AUX1 ) * cnort(1,jj) * pp(1,IELEM) + &
-						( COEF2 + AUX2 ) * cnort(2,jj) * pp(4,IELEM) +&
-						( COEF2 + AUX3 ) * cnort(3,jj) * pp(7,IELEM) +&
-						AUX12 * ( pp(1,IELEM) * cnort(2,jj) + pp(4,IELEM) *cnort(1,jj))+&
-						AUX13 * ( pp(1,IELEM) * cnort(3,jj) + pp(7,IELEM) *cnort(1,jj))+ & 
-						AUX23 * ( pp(4,IELEM) * cnort(3,jj) + pp(7,IELEM) *cnort(2,jj))
+    do jj=1,8
+      cnort(1,jj)=cnorm(1,kone(ii+jj))
+      cnort(2,jj)=cnorm(2,kone(ii+jj))
+      cnort(3,jj)=cnorm(3,kone(ii+jj))
+    end do
+       
+    do jj=1,8
+      uvwp(jj,4)=uvw(4,kone(ii+jj))
+    end do
 
-				D22c = ( COEF1 + AUX2 ) * cnort(2,jj) * pp(5,IELEM) + &
-					   ( COEF2 + AUX1 ) * cnort(1,jj) * pp(2,IELEM) +&
-					   ( COEF2 + AUX3 ) * cnort(3,jj) * pp(8,IELEM) + &   
-						AUX12 * ( pp(2,IELEM) * cnort(2,jj) + pp(5,IELEM) *cnort(1,jj))+&
-						AUX13 * ( pp(2,IELEM) * cnort(3,jj) + pp(8,IELEM) *cnort(1,jj))+ & 
-						AUX23 * ( pp(5,IELEM) * cnort(3,jj) + pp(8,IELEM) *cnort(2,jj))
+!   Pressao media no elemento
+    PRmd = sum(uvwp(:,4))*0.125D0
 
-				D33c = ( COEF1 + AUX3 ) * cnort(3,jj) * pp(9,IELEM) + &
- 	              ( COEF2 + AUX1 ) * cnort(1,jj) * pp(3,IELEM) +&
- 	              ( COEF2 + AUX2 ) * cnort(2,jj) * pp(6,IELEM) + &   
-					AUX12 * ( pp(3,IELEM) * cnort(2,jj) + pp(6,IELEM) *cnort(1,jj))+ &
-					AUX13 * ( pp(3,IELEM) * cnort(3,jj) + pp(9,IELEM) *cnort(1,jj))+ & 
-					AUX23 * ( pp(6,IELEM) * cnort(3,jj) + pp(9,IELEM) *cnort(2,jj))
+!   Constantes do tensor de balanco difusivo
+    AUX1 = Delt*0.25D0*uvwprom(1,ielem)*uvwprom(1,ielem)
+    AUX2 = Delt*0.25D0*uvwprom(2,ielem)*uvwprom(2,ielem)
+    AUX3 = Delt*0.25D0*uvwprom(3,ielem)*uvwprom(3,ielem)
+    AUX12 = Delt*0.25D0*uvwprom(1,ielem)*uvwprom(2,ielem)
+    AUX13 = Delt*0.25D0*uvwprom(1,ielem)*uvwprom(3,ielem)
+    AUX23 = Delt*0.25D0*uvwprom(2,ielem)*uvwprom(3,ielem)
 
-				D12c = COEF2*pp(2,IELEM)*cnort(2,jj) + COEF3*pp(5,IELEM)*cnort(1,jj)
-				D21c = COEF2*pp(4,IELEM)*cnort(1,jj) + COEF3*pp(1,IELEM)*cnort(2,jj)
-				D13c = COEF2*pp(3,IELEM)*cnort(3,jj) + COEF3*pp(9,IELEM)*cnort(1,jj)
-				D31c = COEF2*pp(7,IELEM)*cnort(1,jj) + COEF3*pp(1,IELEM)*cnort(3,jj)
-				D23c = COEF2*pp(6,IELEM)*cnort(3,jj) + COEF3*pp(9,IELEM)*cnort(2,jj)
-				D32c = COEF2*pp(8,IELEM)*cnort(2,jj) + COEF3*pp(5,IELEM)*cnort(3,jj)
-				
+!   *******************************************************************************
+!   ********* CONSTANTES DE DIFUS�O - TERMOS DE CONTORNO(PASSO 1) !XXXXalterado 12.09.11
+!   *******************************************************************************
+	  auxv = (ViscCin + VDTurb(IELEM))
+	  
+	  IF(auxv.LT.1.00D0*ViscCin) auxv = 1.00D0*ViscCin						
+
+    COEF1= 2.0D0 * auxv + ViscVol
+    COEF2= auxv 
+    COEF3= ViscVol						                    
+
+!   ********************************************************************************
+!     Termos de contorno da eq. de momentum			PASSO 1)		!XXXX 08.07.11
+!   ********************************************************************************
+		if (NNEqMom/=0) then											!XXXX 08.07.11
+		do jj=1,8
  
-				FF1= D11c + D12c + D13c - PRmd*(1.0D0/RHOInf)*cnort(1,jj)
-				FF2= D21c + D22c + D23c - PRmd*(1.0D0/RHOInf)*cnort(2,jj)
-				FF3= D31c + D32c + D33c - PRmd*(1.0D0/RHOInf)*cnort(3,jj)
-				
-				FF1f(IELEM,jj)=FF1*NK(jj)*Delt*0.5D0                             
-				FF2f(IELEM,jj)=FF2*NK(jj)*Delt*0.5D0
-				FF3f(IELEM,jj)=FF3*NK(jj)*Delt*0.5D0
+			IF (FCONTOR(III+jj)/=0.0D0)	THEN
 
-				END IF
-			end do
-			end if	
+			D11c = ( COEF1 + AUX1 ) * cnort(1,jj) * pp(1,IELEM) + &
+					( COEF2 + AUX2 ) * cnort(2,jj) * pp(4,IELEM) +&
+					( COEF2 + AUX3 ) * cnort(3,jj) * pp(7,IELEM) +&
+					AUX12 * ( pp(1,IELEM) * cnort(2,jj) + pp(4,IELEM) *cnort(1,jj))+&
+					AUX13 * ( pp(1,IELEM) * cnort(3,jj) + pp(7,IELEM) *cnort(1,jj))+ & 
+					AUX23 * ( pp(4,IELEM) * cnort(3,jj) + pp(7,IELEM) *cnort(2,jj))
 
-		end if
-		call syncthreads()
+			D22c = ( COEF1 + AUX2 ) * cnort(2,jj) * pp(5,IELEM) + &
+				   ( COEF2 + AUX1 ) * cnort(1,jj) * pp(2,IELEM) +&
+				   ( COEF2 + AUX3 ) * cnort(3,jj) * pp(8,IELEM) + &   
+					AUX12 * ( pp(2,IELEM) * cnort(2,jj) + pp(5,IELEM) *cnort(1,jj))+&
+					AUX13 * ( pp(2,IELEM) * cnort(3,jj) + pp(8,IELEM) *cnort(1,jj))+ & 
+					AUX23 * ( pp(5,IELEM) * cnort(3,jj) + pp(8,IELEM) *cnort(2,jj))
+
+			D33c = ( COEF1 + AUX3 ) * cnort(3,jj) * pp(9,IELEM) + &
+               ( COEF2 + AUX1 ) * cnort(1,jj) * pp(3,IELEM) +&
+               ( COEF2 + AUX2 ) * cnort(2,jj) * pp(6,IELEM) + &   
+				AUX12 * ( pp(3,IELEM) * cnort(2,jj) + pp(6,IELEM) *cnort(1,jj))+ &
+				AUX13 * ( pp(3,IELEM) * cnort(3,jj) + pp(9,IELEM) *cnort(1,jj))+ & 
+				AUX23 * ( pp(6,IELEM) * cnort(3,jj) + pp(9,IELEM) *cnort(2,jj))
+
+			D12c = COEF2*pp(2,IELEM)*cnort(2,jj) + COEF3*pp(5,IELEM)*cnort(1,jj)
+			D21c = COEF2*pp(4,IELEM)*cnort(1,jj) + COEF3*pp(1,IELEM)*cnort(2,jj)
+			D13c = COEF2*pp(3,IELEM)*cnort(3,jj) + COEF3*pp(9,IELEM)*cnort(1,jj)
+			D31c = COEF2*pp(7,IELEM)*cnort(1,jj) + COEF3*pp(1,IELEM)*cnort(3,jj)
+			D23c = COEF2*pp(6,IELEM)*cnort(3,jj) + COEF3*pp(9,IELEM)*cnort(2,jj)
+			D32c = COEF2*pp(8,IELEM)*cnort(2,jj) + COEF3*pp(5,IELEM)*cnort(3,jj)
+   
+ 
+			FF1= D11c + D12c + D13c - PRmd*(1.0D0/RHOInf)*cnort(1,jj)
+			FF2= D21c + D22c + D23c - PRmd*(1.0D0/RHOInf)*cnort(2,jj)
+			FF3= D31c + D32c + D33c - PRmd*(1.0D0/RHOInf)*cnort(3,jj)
+	 
+			FF1f(IELEM,jj)=FF1*NK(jj)*Delt*0.5D0                             
+			FF2f(IELEM,jj)=FF2*NK(jj)*Delt*0.5D0
+			FF3f(IELEM,jj)=FF3*NK(jj)*Delt*0.5D0
+
+			END IF
+		end do
+		end if	
+		
+	end if
+	call syncthreads()
 	end subroutine laco_11
 
 	!!! La�o 12
@@ -1027,7 +1025,7 @@ contains
 	
 		if (I <= CONT) then
 	
-	    !!! La�o 13
+	!!! La�o 13
 	
 			UVWa(1,I) = uvw(1,I) + RRG(1,I)/mlum(I)
 			UVWa(2,I) = uvw(2,I) + RRG(2,I)/mlum(I)
@@ -1040,83 +1038,83 @@ contains
 	
 	attributes (global) subroutine laco_14(JIN, DETERJ, kone, uvw, uvwa, BB1, BB2, BB3, &
 										   CRU, CRV, CRW)
-		implicit none
-		integer					:: kone(:)
-		real(4)					:: JIN(:,:), uvw(:,:), uvwa(:,:), BB1(:,:), BB2(:,:), BB3(:,:), &
-								   cru(:,:), crv(:,:), crw(:,:)
-		real(4)					:: DETERJ(:)
-		real(4), device			:: uvwp(8,4), b123(24,8)
-		real(4), device			:: JB11, JB12, JB13, JB21, JB22, JB23, JB31, JB32, JB33
-		integer, device			:: IELEM, CONT, j, jj, jjj, i, II
+	implicit none
+	integer					:: kone(:)
+	real(4)					:: JIN(:,:), uvw(:,:), uvwa(:,:), BB1(:,:), BB2(:,:), BB3(:,:), &
+							   cru(:,:), crv(:,:), crw(:,:)
+	real(4)					:: DETERJ(:)
+	real(4), device			:: uvwp(8,4), b123(24,8)
+	real(4), device			:: JB11, JB12, JB13, JB21, JB22, JB23, JB31, JB32, JB33
+	integer, device			:: IELEM, CONT, j, jj, jjj, i, II
 	
-		IELEM = (blockIdx%x-1)*blockDim%x + threadIdx%x
-		CONT = size(JIN,2)							! N�MERO DE N�S (NNM)
+	IELEM = (blockIdx%x-1)*blockDim%x + threadIdx%x
+	CONT = size(JIN,2)							! N�MERO DE N�S (NNM)
 	
-		if (IELEM <= CONT) then
+	if (IELEM <= CONT) then
 	
-		II= (IELEM-1)*8
+	II= (IELEM-1)*8
 	
-			JB11= JIN(1,IELEM) * DETERJ(IELEM)
-			JB12= JIN(2,IELEM) * DETERJ(IELEM)
-			JB13= JIN(3,IELEM) * DETERJ(IELEM)
-			JB21= JIN(4,IELEM) * DETERJ(IELEM)
-			JB22= JIN(5,IELEM) * DETERJ(IELEM)
-			JB23= JIN(6,IELEM) * DETERJ(IELEM)
-			JB31= JIN(7,IELEM) * DETERJ(IELEM)
-			JB32= JIN(8,IELEM) * DETERJ(IELEM)
-			JB33= JIN(9,IELEM) * DETERJ(IELEM)
+		JB11= JIN(1,IELEM) * DETERJ(IELEM)
+		JB12= JIN(2,IELEM) * DETERJ(IELEM)
+		JB13= JIN(3,IELEM) * DETERJ(IELEM)
+		JB21= JIN(4,IELEM) * DETERJ(IELEM)
+		JB22= JIN(5,IELEM) * DETERJ(IELEM)
+		JB23= JIN(6,IELEM) * DETERJ(IELEM)
+		JB31= JIN(7,IELEM) * DETERJ(IELEM)
+		JB32= JIN(8,IELEM) * DETERJ(IELEM)
+		JB33= JIN(9,IELEM) * DETERJ(IELEM)
+		
+		do j=1,8
+			uvwp(j,4) = uvwa(4,kone(ii+j))-uvw(4,kone(ii+j))		! problema no campo uvwa para o n� 24383
+			!IF (IELEM == 10549) then		
+			!write(*,*) "Laco 14", ielem, j, kone(ii+j), uvwp(j,4), uvwa(4,kone(ii+j)), uvw(4,kone(ii+j))	
+			!end if
+		end do
+		
+		do j=1,8
+			do jj=1,8
+				jjj=jj*3
 
-			do j=1,8
-				uvwp(j,4) = uvwa(4,kone(ii+j))-uvw(4,kone(ii+j))		! problema no campo uvwa para o n� 24383
-				!IF (IELEM == 10549) then		
-				!write(*,*) "Laco 14", ielem, j, kone(ii+j), uvwp(j,4), uvwa(4,kone(ii+j)), uvw(4,kone(ii+j))	
-				!end if
+				b123(jjj-2,j)=(JB11*BB1(jj,J)+JB12*BB2(jj,J)+JB13*BB3(jj,J))*.125D0
+				b123(jjj-1,j)=(JB21*BB1(jj,J)+JB22*BB2(jj,J)+JB23*BB3(jj,J))*.125D0
+				b123(jjj,j)  =(JB31*BB1(jj,J)+JB32*BB2(jj,J)+JB33*BB3(jj,J))*.125D0
+				
 			end do
+		end do
 
-			do j=1,8
-				do jj=1,8
-					jjj=jj*3
+		do i=1,8
 
-					b123(jjj-2,j)=(JB11*BB1(jj,J)+JB12*BB2(jj,J)+JB13*BB3(jj,J))*.125D0
-					b123(jjj-1,j)=(JB21*BB1(jj,J)+JB22*BB2(jj,J)+JB23*BB3(jj,J))*.125D0
-					b123(jjj,j)  =(JB31*BB1(jj,J)+JB32*BB2(jj,J)+JB33*BB3(jj,J))*.125D0
+			jj=i*3-2                                                      !!!! Aparentemente bem
+			cru(ielem,i)=dot_product(b123(jj,:),uvwp(:,4))
+			jj=jj+1
+			crv(ielem,i)=dot_product(b123(jj,:),uvwp(:,4))
+			jj=jj+1
+			crw(ielem,i)=dot_product(b123(jj,:),uvwp(:,4))
+			
+			!IF (IELEM == 10549) then		
+			!write(*,*) "Laco 14", ielem, i, cru(IELEM,I), crv(IELEM,I), crw(IELEM,I)	
+			!end if
+			
+			!IF (IELEM == 14832) then		
+			!write(*,*) "Laco 14", ielem, i, cru(IELEM,I), crv(IELEM,I), crw(IELEM,I)	
+			!end if
+			
+			!IF (IELEM == 14741) then		
+			!write(*,*) "Laco 14", ielem, i, cru(IELEM,I), crv(IELEM,I), crw(IELEM,I)	
+			!end if
+			
+			!IF (IELEM == 14742) then		
+			!write(*,*) "Laco 14", ielem, i, cru(IELEM,I), crv(IELEM,I), crw(IELEM,I)	
+			!end if
+			
+			!write(*,*) 'Laco 14'
 
-				end do
-			end do
-
-			do i=1,8
-
-				jj=i*3-2                                                      !!!! Aparentemente bem
-				cru(ielem,i)=dot_product(b123(jj,:),uvwp(:,4))
-				jj=jj+1
-				crv(ielem,i)=dot_product(b123(jj,:),uvwp(:,4))
-				jj=jj+1
-				crw(ielem,i)=dot_product(b123(jj,:),uvwp(:,4))
-
-				!IF (IELEM == 10549) then		
-				!write(*,*) "Laco 14", ielem, i, cru(IELEM,I), crv(IELEM,I), crw(IELEM,I)	
-				!end if
-
-				!IF (IELEM == 14832) then		
-				!write(*,*) "Laco 14", ielem, i, cru(IELEM,I), crv(IELEM,I), crw(IELEM,I)	
-				!end if
-
-				!IF (IELEM == 14741) then		
-				!write(*,*) "Laco 14", ielem, i, cru(IELEM,I), crv(IELEM,I), crw(IELEM,I)	
-				!end if
-
-				!IF (IELEM == 14742) then		
-				!write(*,*) "Laco 14", ielem, i, cru(IELEM,I), crv(IELEM,I), crw(IELEM,I)	
-				!end if
-
-				!write(*,*) 'Laco 14'
-
-			end do		
-
-			!write(*,*) "Laco 14 - Fim", ielem
-
-		end if
-		call syncthreads()
+		end do		
+		
+		!write(*,*) "Laco 14 - Fim", ielem
+		
+	end if
+	call syncthreads()
 	end subroutine laco_14
 	
 	! XXXXNEIB - Modificado para poder usar at� 12 elemeentos ao redor de um n�
@@ -1193,149 +1191,149 @@ contains
 	!!! La�o 17- Imposi��o das condi��es de contorno do problema - Vai de u a p
 	!______________________________________________________________________________________________
 	attributes (global) subroutine impose_CC(uvwa, IBCU, BCU, IBCV, BCV, IBCW, BCW, IBCP, BCP)
-		implicit none
-		real(4)				:: uvwa(:,:)
-		real(4)				:: BCU(:), BCV(:), BCW(:), BCP(:)
-		integer				:: IBCU(:), IBCV(:), IBCW(:), IBCP(:)
-		integer, device		:: I, NNO
+	implicit none
+	real(4)				:: uvwa(:,:)
+	real(4)				:: BCU(:), BCV(:), BCW(:), BCP(:)
+	integer				:: IBCU(:), IBCV(:), IBCW(:), IBCP(:)
+	integer, device		:: I, NNO
 	
-		I = (blockIdx%x-1)*blockDim%x + threadIdx%x
+	I = (blockIdx%x-1)*blockDim%x + threadIdx%x
 
-		if (I <= MAX(NBUd, NBVd, NBWd, NBPd))	then 
+	if (I <= MAX(NBUd, NBVd, NBWd, NBPd))	then 
 	
-		!______________________________________________________________________________________________
-		if (NBUd.NE.0 .and. I <= NBUd) then
-			NNO= IBCU(I)
-			UVWa(1,NNO)= BCU(I)
-		end if
-		!call syncthreads()
-		!______________________________________________________________________________________________	
-		if (NBVd.NE.0 .and. I <= NBVd) then
-			NNO= IBCV(I)
-			UVWa(2,NNO)= BCV(I)
-		end if
-		!call syncthreads()
-		!______________________________________________________________________________________________	
-		if (NBWd .NE.0 .and. I <= NBWd) then
-			NNO= IBCW(I)
-			UVWa(3,NNO)= BCW(I)
-		end if	
-		!call syncthreads()
-		!______________________________________________________________________________________________
-		if (NBPd .NE.0 .and. I <= NBPd) then						! N�O H� CONDI��ES DE CONTORNO PARA A PRESS�O
-			NNO= IBCP(I)
-			UVWa(4,NNO)= BCP(I)
-			!write(*,*) NNO, BCP(I), UVWa(4, NNO)		
-		end if
-		end if
+	!______________________________________________________________________________________________
+	if (NBUd.NE.0 .and. I <= NBUd) then
+		NNO= IBCU(I)
+		UVWa(1,NNO)= BCU(I)
+	end if
+	!call syncthreads()
+	!______________________________________________________________________________________________	
+	if (NBVd.NE.0 .and. I <= NBVd) then
+		NNO= IBCV(I)
+		UVWa(2,NNO)= BCV(I)
+	end if
+	!call syncthreads()
+	!______________________________________________________________________________________________	
+	if (NBWd .NE.0 .and. I <= NBWd) then
+		NNO= IBCW(I)
+		UVWa(3,NNO)= BCW(I)
+	end if	
+	!call syncthreads()
+	!______________________________________________________________________________________________
+	if (NBPd .NE.0 .and. I <= NBPd) then						! N�O H� CONDI��ES DE CONTORNO PARA A PRESS�O
+		NNO= IBCP(I)
+		UVWa(4,NNO)= BCP(I)
+		!write(*,*) NNO, BCP(I), UVWa(4, NNO)		
+	end if
+	end if
 	
-		!write(*,*) 'Laco 17'
+	!write(*,*) 'Laco 17'
 	
-		call syncthreads()
+	call syncthreads()
 	end subroutine impose_CC
 	
 	!!! La�o 18
 	attributes (global) subroutine laco_18(pp, uvwprom, PNV, Gr1P, Gr2P, Gr3P, VOLU, &
 										   JIN, uvwa, kone)
-		implicit none 
-		integer				:: kone(:)
-		real(4)				:: JIN(:,:), uvwa(:,:)
-		real(4)	            :: VOLU(:)
-		real(4)				:: pp(:,:), uvwprom(:,:)
-		real(4) 			:: PNV(:), Gr1P(:), Gr2P(:), Gr3P(:)
-
-		real(4), device     :: JINV11, JINV12, JINV13, JINV21, JINV22, JINV23, JINV31, JINV32, &
-							   JINV33, VOLUT
-		real(4), device	    :: JCN(8,3), uvwp(8,4)  
-		integer, device	 	:: IELEM, CONT, J, ii
+	implicit none 
+	integer				:: kone(:)
+	real(4)				:: JIN(:,:), uvwa(:,:)
+	real(4)	            :: VOLU(:)
+	real(4)				:: pp(:,:), uvwprom(:,:)
+	real(4) 			:: PNV(:), Gr1P(:), Gr2P(:), Gr3P(:)
+						   
+	real(4), device     :: JINV11, JINV12, JINV13, JINV21, JINV22, JINV23, JINV31, JINV32, &
+						   JINV33, VOLUT
+	real(4), device	    :: JCN(8,3), uvwp(8,4)  
+	integer, device	 	:: IELEM, CONT, J, ii
 	
-		IELEM = (blockIdx%x-1)*blockDim%x + threadIdx%x
-		CONT = size(VOLU)							! N�MERO DE ELEMENTOS (NELM)
+	IELEM = (blockIdx%x-1)*blockDim%x + threadIdx%x
+	CONT = size(VOLU)							! N�MERO DE ELEMENTOS (NELM)
 	
-		if (IELEM <= CONT) then
+	if (IELEM <= CONT) then
 
-			JINV11 = JIN(1,IELEM)
-			JINV12 = JIN(2,IELEM)
-			JINV13 = JIN(3,IELEM)
-			JINV21 = JIN(4,IELEM)
-			JINV22 = JIN(5,IELEM)
-			JINV23 = JIN(6,IELEM)
-			JINV31 = JIN(7,IELEM)
-			JINV32 = JIN(8,IELEM)
-			JINV33 = JIN(9,IELEM)
+		JINV11 = JIN(1,IELEM)
+		JINV12 = JIN(2,IELEM)
+		JINV13 = JIN(3,IELEM)
+		JINV21 = JIN(4,IELEM)
+		JINV22 = JIN(5,IELEM)
+		JINV23 = JIN(6,IELEM)
+		JINV31 = JIN(7,IELEM)
+		JINV32 = JIN(8,IELEM)
+		JINV33 = JIN(9,IELEM)
 
-			II= (IELEM-1)*8				!!!!! AQUI � REALIZADO O LA�O DE UMA FORMA DIFERENTE DO LA�O 1
+		II= (IELEM-1)*8				!!!!! AQUI � REALIZADO O LA�O DE UMA FORMA DIFERENTE DO LA�O 1
+       
+		JCN(1,1) = -JINV11  - JINV12  - JINV13 
+		JCN(2,1) =  JINV11  - JINV12  - JINV13  
+		JCN(3,1) =  JINV11  + JINV12  - JINV13  
+		JCN(4,1) = -JINV11  + JINV12  - JINV13 
+		JCN(5,1) = -JINV11  - JINV12  + JINV13 
+		JCN(6,1) =  JINV11  - JINV12  + JINV13  
+		JCN(7,1) =  JINV11  + JINV12  + JINV13 
+		JCN(8,1) = -JINV11  + JINV12  + JINV13 
+    
+		JCN(1,2) = -JINV21  - JINV22  - JINV23 
+		JCN(2,2) =  JINV21  - JINV22  - JINV23  
+		JCN(3,2) =  JINV21  + JINV22  - JINV23  
+		JCN(4,2) = -JINV21  + JINV22  - JINV23 
+		JCN(5,2) = -JINV21  - JINV22  + JINV23 
+		JCN(6,2) =  JINV21  - JINV22  + JINV23  
+		JCN(7,2) =  JINV21  + JINV22  + JINV23  
+		JCN(8,2) = -JINV21  + JINV22  + JINV23 
+     
+		JCN(1,3) = -JINV31  - JINV32  - JINV33  
+		JCN(2,3) =  JINV31  - JINV32  - JINV33 
+		JCN(3,3) =  JINV31  + JINV32  - JINV33        
+		JCN(4,3) = -JINV31  + JINV32  - JINV33 
+		JCN(5,3) = -JINV31  - JINV32  + JINV33 
+		JCN(6,3) =  JINV31  - JINV32  + JINV33 
+		JCN(7,3) =  JINV31  + JINV32  + JINV33 
+		JCN(8,3) = -JINV31  + JINV32  + JINV33 
 		
-			JCN(1,1) = -JINV11  - JINV12  - JINV13 
-			JCN(2,1) =  JINV11  - JINV12  - JINV13  
-			JCN(3,1) =  JINV11  + JINV12  - JINV13  
-			JCN(4,1) = -JINV11  + JINV12  - JINV13 
-			JCN(5,1) = -JINV11  - JINV12  + JINV13 
-			JCN(6,1) =  JINV11  - JINV12  + JINV13  
-			JCN(7,1) =  JINV11  + JINV12  + JINV13 
-			JCN(8,1) = -JINV11  + JINV12  + JINV13 
-		
-			JCN(1,2) = -JINV21  - JINV22  - JINV23 
-			JCN(2,2) =  JINV21  - JINV22  - JINV23  
-			JCN(3,2) =  JINV21  + JINV22  - JINV23  
-			JCN(4,2) = -JINV21  + JINV22  - JINV23 
-			JCN(5,2) = -JINV21  - JINV22  + JINV23 
-			JCN(6,2) =  JINV21  - JINV22  + JINV23  
-			JCN(7,2) =  JINV21  + JINV22  + JINV23  
-			JCN(8,2) = -JINV21  + JINV22  + JINV23 
-		
-			JCN(1,3) = -JINV31  - JINV32  - JINV33  
-			JCN(2,3) =  JINV31  - JINV32  - JINV33 
-			JCN(3,3) =  JINV31  + JINV32  - JINV33        
-			JCN(4,3) = -JINV31  + JINV32  - JINV33 
-			JCN(5,3) = -JINV31  - JINV32  + JINV33 
-			JCN(6,3) =  JINV31  - JINV32  + JINV33 
-			JCN(7,3) =  JINV31  + JINV32  + JINV33 
-			JCN(8,3) = -JINV31  + JINV32  + JINV33 
-
-			call syncthreads()
-
-			do j=1,8
-				uvwp(j,1) = uvwa(1,kone(ii+j))
-				uvwp(j,2) = uvwa(2,kone(ii+j))
-				uvwp(j,3) = uvwa(3,kone(ii+j))		! Fonte do problema no escoamento em degrau
-				uvwp(j,4) = uvwa(4,kone(ii+j))
-
-				!if (IELEM .EQ. 10548) then
-				!	write(*,*) 'uvwp1 - 20610', kone(20610), uvwa(1,20610)
-				!	write(*,*) 'uvwp1-L18', kone(ii+j), uvwa(1,kone(ii+j)), uvwp(j,1)
-				!	write(*,*) 'uvwp2-L18', kone(ii+j), uvwa(2,kone(ii+j)), uvwp(j,2)
-				!	write(*,*) 'uvwp3-L18', kone(ii+j), uvwa(3,kone(ii+j)), uvwp(j,3)
-				!	write(*,*) 'uvwp4-L18', kone(ii+j), uvwa(4,kone(ii+j)), uvwp(j,4)
-				!end if
-
-
-			end do
-
-			pp(1,IELEM)=dot_product(jcn(:,1),uvwp(:,1))*0.125D0
-			pp(4,IELEM)=dot_product(jcn(:,2),uvwp(:,1))*0.125D0
-			pp(7,IELEM)=dot_product(jcn(:,3),uvwp(:,1))*0.125D0
-			pp(2,IELEM)=dot_product(jcn(:,1),uvwp(:,2))*0.125D0
-			pp(5,IELEM)=dot_product(jcn(:,2),uvwp(:,2))*0.125D0
-			pp(8,IELEM)=dot_product(jcn(:,3),uvwp(:,2))*0.125D0
-			pp(3,IELEM)=dot_product(jcn(:,1),uvwp(:,3))*0.125D0
-			pp(6,IELEM)=dot_product(jcn(:,2),uvwp(:,3))*0.125D0
-			pp(9,IELEM)=dot_product(jcn(:,3),uvwp(:,3))*0.125D0
-
-			PNV(IELEM) = pp(1,IELEM) + pp(5,IELEM) + pp(9,IELEM)
-
-			Gr1P(IELEM) = dot_product(jcn(:,1),uvwp(:,4)) * 0.125D0
-			Gr2P(IELEM) = dot_product(jcn(:,2),uvwp(:,4)) * 0.125D0
-			Gr3P(IELEM) = dot_product(jcn(:,3),uvwp(:,4)) * 0.125D0
-
-			uvwprom(1,ielem)= sum(uvwp(:,1))*0.125D0
-			uvwprom(2,ielem)= sum(uvwp(:,2))*0.125D0
-			uvwprom(3,ielem)= sum(uvwp(:,3))*0.125D0
-
-			!write(*,*) 'Laco 18'
-
-		end if
 		call syncthreads()
+		
+		do j=1,8
+			uvwp(j,1) = uvwa(1,kone(ii+j))
+			uvwp(j,2) = uvwa(2,kone(ii+j))
+			uvwp(j,3) = uvwa(3,kone(ii+j))		! Fonte do problema no escoamento em degrau
+			uvwp(j,4) = uvwa(4,kone(ii+j))
+
+			!if (IELEM .EQ. 10548) then
+			!	write(*,*) 'uvwp1 - 20610', kone(20610), uvwa(1,20610)
+			!	write(*,*) 'uvwp1-L18', kone(ii+j), uvwa(1,kone(ii+j)), uvwp(j,1)
+			!	write(*,*) 'uvwp2-L18', kone(ii+j), uvwa(2,kone(ii+j)), uvwp(j,2)
+			!	write(*,*) 'uvwp3-L18', kone(ii+j), uvwa(3,kone(ii+j)), uvwp(j,3)
+			!	write(*,*) 'uvwp4-L18', kone(ii+j), uvwa(4,kone(ii+j)), uvwp(j,4)
+			!end if
+			
+			
+		end do
+		    
+		pp(1,IELEM)=dot_product(jcn(:,1),uvwp(:,1))*0.125D0
+		pp(4,IELEM)=dot_product(jcn(:,2),uvwp(:,1))*0.125D0
+		pp(7,IELEM)=dot_product(jcn(:,3),uvwp(:,1))*0.125D0
+		pp(2,IELEM)=dot_product(jcn(:,1),uvwp(:,2))*0.125D0
+		pp(5,IELEM)=dot_product(jcn(:,2),uvwp(:,2))*0.125D0
+		pp(8,IELEM)=dot_product(jcn(:,3),uvwp(:,2))*0.125D0
+		pp(3,IELEM)=dot_product(jcn(:,1),uvwp(:,3))*0.125D0
+		pp(6,IELEM)=dot_product(jcn(:,2),uvwp(:,3))*0.125D0
+		pp(9,IELEM)=dot_product(jcn(:,3),uvwp(:,3))*0.125D0
+		
+		PNV(IELEM) = pp(1,IELEM) + pp(5,IELEM) + pp(9,IELEM)
+
+		Gr1P(IELEM) = dot_product(jcn(:,1),uvwp(:,4)) * 0.125D0
+		Gr2P(IELEM) = dot_product(jcn(:,2),uvwp(:,4)) * 0.125D0
+		Gr3P(IELEM) = dot_product(jcn(:,3),uvwp(:,4)) * 0.125D0
+
+		uvwprom(1,ielem)= sum(uvwp(:,1))*0.125D0
+		uvwprom(2,ielem)= sum(uvwp(:,2))*0.125D0
+		uvwprom(3,ielem)= sum(uvwp(:,3))*0.125D0
+		
+		!write(*,*) 'Laco 18'
+												  
+	end if
+	call syncthreads()
 	end subroutine laco_18
 	
 	!!! La�o 19
@@ -1346,247 +1344,247 @@ contains
 										 DETERJ, Delt, RHOinf, VNVX, CONTROL1, Cv, &
 										 ViscVol, ViscCin, Schit, Prtlt, Kdif, Dab, VelSom, &
 										 elump1, elump2, elump3, IndTurb, VDTurb)
-		implicit none
-		integer			:: kone(:)
-		integer			:: IndTurb
-		real(4)			:: uvwa(:,:), uvw(:,:), mmm(:,:), JIN(:,:), uvwprom(:,:), TB1(:,:), &
-						   TB2(:,:), TB3(:,:), BB1(:,:), BB2(:,:), BB3(:,:), dd11(:,:), &
-						   dd12(:,:), dd13(:,:), dd21(:,:), dd22(:,:), dd23(:,:), &
-						   dd31(:,:), dd32(:,:), dd33(:,:), hourg(:,:), rru(:,:), &
-						   rrv(:,:), rrw(:,:), rrp(:,:)
-		real(4)			:: VOLU(:), DETERJ(:), VDTurb(:)
-		real(4) 		:: Delt, RHOInf, VNVX, CONTROL1, Cv, ViscVol, ViscCin, Schit, Prtlt, &
-						   Kdif, Dab, VelSom, elump1, elump2, elump3
-
-		real(4), device	:: uvwp(8,4), uvwt(8,4), mass(8,8), maslp(8,8), maslt(8,8), maslm(8,8),&
-						   jbb(3,3), jbt(3,3), AG1(8,8), AG2(8,8), AG3(8,8), b123(24,8), adv(8,8),&
-						   dd(3,3), add(3,3), D11(8,8), D22(8,8), D33(8,8), D12(8,8), D13(8,8), &
-						   D23(8,8), DFP(8,8), K(8,8), KRH(8,8), jbb_dd(3,3)
-
-		real(4), device	:: masd, Aux, AuxADV, Prtl, Schi, auxv, auxt, auxm, COEF1, COEF2, COEF3, &
-						   COEFt, COEFm, AUX4, CHG, LRUNP, LRVNP, LRWNP, LRPNP, MRP, VC
-		integer, device	:: IELEM, CONT, ii, j, jj, jjj, i
-
-		IELEM = (blockIdx%x-1)*blockDim%x + threadIdx%x
-		CONT = size(VOLU)
+	implicit none
+	integer			:: kone(:)
+	integer			:: IndTurb
+	real(4)			:: uvwa(:,:), uvw(:,:), mmm(:,:), JIN(:,:), uvwprom(:,:), TB1(:,:), &
+					   TB2(:,:), TB3(:,:), BB1(:,:), BB2(:,:), BB3(:,:), dd11(:,:), &
+					   dd12(:,:), dd13(:,:), dd21(:,:), dd22(:,:), dd23(:,:), &
+					   dd31(:,:), dd32(:,:), dd33(:,:), hourg(:,:), rru(:,:), &
+					   rrv(:,:), rrw(:,:), rrp(:,:)
+	real(4)			:: VOLU(:), DETERJ(:), VDTurb(:)
+	real(4) 		:: Delt, RHOInf, VNVX, CONTROL1, Cv, ViscVol, ViscCin, Schit, Prtlt, &
+					   Kdif, Dab, VelSom, elump1, elump2, elump3
+					   				   
+	real(4), device	:: uvwp(8,4), uvwt(8,4), mass(8,8), maslp(8,8), maslt(8,8), maslm(8,8),&
+					   jbb(3,3), jbt(3,3), AG1(8,8), AG2(8,8), AG3(8,8), b123(24,8), adv(8,8),&
+					   dd(3,3), add(3,3), D11(8,8), D22(8,8), D33(8,8), D12(8,8), D13(8,8), &
+					   D23(8,8), DFP(8,8), K(8,8), KRH(8,8), jbb_dd(3,3)
+					   
+	real(4), device	:: masd, Aux, AuxADV, Prtl, Schi, auxv, auxt, auxm, COEF1, COEF2, COEF3, &
+					   COEFt, COEFm, AUX4, CHG, LRUNP, LRVNP, LRWNP, LRPNP, MRP, VC
+	integer, device	:: IELEM, CONT, ii, j, jj, jjj, i
+					   
+	IELEM = (blockIdx%x-1)*blockDim%x + threadIdx%x
+	CONT = size(VOLU)
 	
-		if (IELEM <= CONT)	then
-
-			ii= (IELEM-1)*8
-
-			call syncthreads()
-
-			do j=1,8
-			  uvwp(j,1) = uvwa(1,kone(ii+j))				!!!! AQUI TEM-SE UM PROBLEMA DE MEM�RIA
-			  uvwp(j,2) = uvwa(2,kone(ii+j))
-			  uvwp(j,3) = uvwa(3,kone(ii+j))
-			  uvwp(j,4) = uvwa(4,kone(ii+j))
-	
-			  uvwt(j,4) = uvw(4,kone(ii+j))					!!! Verificar a necessidade desta opera��o
-			
-				!if (IELEM .EQ. 10548) then
-				!	write(*,*) 'L19-uvwt', kone(ii+j), uvw(4,kone(ii+j)), uvwt(j,4)
-				!	write(*,*)
-				!	write(*,*) 'uvwp1 - 20610', kone(20610), uvwa(1,20610)
-				!	write(*,*) 'L19- uvwp1', kone(ii+j), uvwa(1,kone(ii+j)), uvwp(j,1)
-				!	write(*,*) 'L19- uvwp2', kone(ii+j), uvwa(2,kone(ii+j)), uvwp(j,2)
-				!	write(*,*) 'L19- uvwp3', kone(ii+j), uvwa(3,kone(ii+j)), uvwp(j,3)
-				!	write(*,*) 'L19- uvwp4', kone(ii+j), uvwa(4,kone(ii+j)), uvwp(j,4)	
-				!end if
-			end do
-
-			VC= VOLU(IELEM)*0.015625D0
-
-			mass=vc*transpose(mmm)
-			masd=volu(ielem)/8.0d0
-			maslp=(1.0d0-elump1)*mass	
-
-			!if (IELEM .EQ. 10548) then
-			!		write(*,*) 'L19- maslp', maslp(1,1), maslp(2,2), maslp(3,3), maslp(4,4)
-			!		write(*,*) 'L19- maslp', maslp(5,5), maslp(6,6), maslp(7,7), maslp(8,8)
-			!end if
-
-			maslt=(1.0d0-elump2)*mass						                
-			maslm=(1.0d0-elump3)*mass						                
-			do i=1,8
-			  maslp(i,i)=maslp(i,i)+elump1*masd				                
-			  maslt(i,i)=maslt(i,i)+elump2*masd				                
-			  maslm(i,i)=maslm(i,i)+elump3*masd				                
-			end do
-
-			Aux = RHOInf*(VelSom**2)
-			AuxADV = 0.0D0
-
-			Prtl = RHOInf*Cv*ViscCin/Kdif
-			Schi = ViscCin/Dab
-
-			if(IndTurb.eq.0) then
-				auxv = ViscCin
-			  !auxt = ViscCin/Prtl 										    
-			  !auxm = ViscCin/Schi											
-			else 
-				auxv = (ViscCin + VDTurb(IELEM))
-			  !auxt = ViscCin/Prtl + VDTurb(IELEM)/Prtlt						
-			  !auxm = ViscCin/Schi + VDTurb(IELEM)/Schit						 
-			
-				IF(auxv.LT.1.00D0*ViscCin) 		auxv = 1.00D0*ViscCin																										
-			  !IF(auxt.LT.1.00D0*ViscCin/Prtl)	auxt = 1.00D0*ViscCin/Prtl				
-			  !IF(auxm.LT.1.00D0*ViscCin/Schi)    auxm = 1.00D0*ViscCin/Schi		
-			end if
-
-			COEF1= 2.0D0 * auxv + ViscVol
-			COEF2= auxv 
-			COEF3= ViscVol         
-			COEFt= 1.0d0/(RHOInf*Cv)*auxt								
-			COEFm= auxm													
-			AUX4 = 0.0D0
-		!   ---------------------------------------------------------------------------
-		!                        Chg dado pelo criterio CHRISTON 
-		!   ---------------------------------------------------------------------------
-
-			CHG= (VOLU(IELEM)**(1.0D0/3.D0))*1.0D0*0.5D0*VOLU(IELEM)*(1.0D0-(VNVX**(1.D0/3.D0)))*CONTROL1
-
-			jbb(1,1) = JIN(1,IELEM) * DETERJ(IELEM)
-			jbb(1,2) = JIN(2,IELEM) * DETERJ(IELEM)
-			jbb(1,3) = JIN(3,IELEM) * DETERJ(IELEM)
-			jbb(2,1) = JIN(4,IELEM) * DETERJ(IELEM)
-			jbb(2,2) = JIN(5,IELEM) * DETERJ(IELEM)
-			jbb(2,3) = JIN(6,IELEM) * DETERJ(IELEM)
-			jbb(3,1) = JIN(7,IELEM) * DETERJ(IELEM)
-			jbb(3,2) = JIN(8,IELEM) * DETERJ(IELEM)
-			jbb(3,3) = JIN(9,IELEM) * DETERJ(IELEM)
-
-			jbt=transpose(jbb)
-
-			do j=1,8
-			  do jj=1,8
-
-				AG1(jj,J)=(jbb(1,1)*TB1(jj,J)+jbb(1,2)*TB2(jj,J)+jbb(1,3)*TB3(jj,J))*.125D0
-				AG2(jj,J)=(jbb(2,1)*TB1(jj,J)+jbb(2,2)*TB2(jj,J)+ jbb(2,3)*TB3(jj,J))*.125D0
-				AG3(jj,J)=(jbb(3,1)*TB1(jj,J)+jbb(3,2)*TB2(jj,J)+ jbb(3,3)*TB3(jj,J))*.125D0
-				
-			 end do
-			end do
-
-			do j=1,8
-			  do jj=1,8
-				
-				jjj=jj*3
-				b123(jjj-2,j)=(jbb(1,1)*BB1(jj,J)+jbb(1,2)*BB2(jj,J)+ jbb(1,3)*BB3(jj,J))*.125D0
-				b123(jjj-1,j)=(jbb(2,1)*BB1(jj,J)+jbb(2,2)*BB2(jj,J)+ jbb(2,3)*BB3(jj,J))*.125D0
-				b123(jjj,j)  =(jbb(3,1)*BB1(jj,J)+jbb(3,2)*BB2(jj,J)+ jbb(3,3)*BB3(jj,J))*.125D0
-
-				adv(j,jj)=b123(jjj-2,J)*uvwprom(1,ielem)+ b123(jjj-1,J)*uvwprom(2,ielem)+&
-						  b123(jjj,J)*uvwprom(3,ielem)
-
-			  end do
-			end do
-
-			do j=1,8
-			  do jj=1,8
-				
-				dd(1,1) = dd11(jj,j)
-				dd(1,2) = dd12(jj,j)
-				dd(1,3) = dd13(jj,j)
-				dd(2,1) = dd21(jj,j)
-				dd(2,2) = dd22(jj,j)
-				dd(2,3) = dd23(jj,j)
-				dd(3,1) = dd31(jj,j)
-				dd(3,2) = dd32(jj,j)
-				dd(3,3) = dd33(jj,j)
-				
-				! Primeiro matmul (jbb x dd)
-				jbb_dd(1,1) = jbb(1,1)*dd(1,1)+jbb(1,2)*dd(2,1)+jbb(1,3)*dd(3,1)
-				jbb_dd(1,2) = jbb(1,1)*dd(1,2)+jbb(1,2)*dd(2,2)+jbb(1,3)*dd(3,2)
-				jbb_dd(1,3) = jbb(1,1)*dd(1,3)+jbb(1,2)*dd(2,3)+jbb(1,3)*dd(3,3)
-				
-				jbb_dd(2,1) = jbb(2,1)*dd(1,1)+jbb(2,2)*dd(2,1)+jbb(2,3)*dd(3,1)
-				jbb_dd(2,2) = jbb(2,1)*dd(1,2)+jbb(2,2)*dd(2,2)+jbb(2,3)*dd(3,2)
-				jbb_dd(2,3) = jbb(2,1)*dd(1,3)+jbb(2,2)*dd(2,3)+jbb(2,3)*dd(3,3)
-				
-				jbb_dd(3,1) = jbb(3,1)*dd(1,1)+jbb(3,2)*dd(2,1)+jbb(3,3)*dd(3,1)
-				jbb_dd(3,2) = jbb(3,1)*dd(1,2)+jbb(3,2)*dd(2,2)+jbb(3,3)*dd(3,2)
-				jbb_dd(3,3) = jbb(3,1)*dd(1,3)+jbb(3,2)*dd(2,3)+jbb(3,3)*dd(3,3)
-				
-				! Segundo matmul (jbb_dd x jbt)	---	add = matmul(jbb_dd,jbt)
-				
-				add(1,1) = jbb_dd(1,1)*jbt(1,1)+jbb_dd(1,2)*jbt(2,1)+jbb_dd(1,3)*jbt(3,1)
-				add(1,2) = jbb_dd(1,1)*jbt(1,2)+jbb_dd(1,2)*jbt(2,2)+jbb_dd(1,3)*jbt(3,2)
-				add(1,3) = jbb_dd(1,1)*jbt(1,3)+jbb_dd(1,2)*jbt(2,3)+jbb_dd(1,3)*jbt(3,3)
-				
-				add(2,1) = jbb_dd(2,1)*jbt(1,1)+jbb_dd(2,2)*jbt(2,1)+jbb_dd(2,3)*jbt(3,1)
-				add(2,2) = jbb_dd(2,1)*jbt(1,2)+jbb_dd(2,2)*jbt(2,2)+jbb_dd(2,3)*jbt(3,2)
-				add(2,3) = jbb_dd(2,1)*jbt(1,3)+jbb_dd(2,2)*jbt(2,3)+jbb_dd(2,3)*jbt(3,3)
-				
-				add(3,1) = jbb_dd(3,1)*jbt(1,1)+jbb_dd(3,2)*jbt(2,1)+jbb_dd(3,3)*jbt(3,1)
-				add(3,2) = jbb_dd(3,1)*jbt(1,2)+jbb_dd(3,2)*jbt(2,2)+jbb_dd(3,3)*jbt(3,2)
-				add(3,3) = jbb_dd(3,1)*jbt(1,3)+jbb_dd(3,2)*jbt(2,3)+jbb_dd(3,3)*jbt(3,3)
-				!
-				
-				add(1,1) = add(1,1) +chg*hourg(jj,j)
-				add(2,2) = add(2,2) +chg*hourg(jj,j)
-				add(3,3) = add(3,3) +chg*hourg(jj,j)
-				
-				call syncthreads()
-
-				D11(j,jj)= (COEF1*add(1,1)+ COEF2*(add(2,2)+add(3,3)))/VOLU(IELEM)
-				D22(j,jj)= (COEF1*add(2,2)+ COEF2*(add(3,3)+add(1,1)))/VOLU(IELEM)
-				D33(j,jj)= (COEF1*add(3,3)+ COEF2*(add(1,1)+add(2,2)))/VOLU(IELEM)
-				D12(j,jj)= (COEF2*add(1,2)+ COEF3*add(2,1))/VOLU(IELEM)
-				D13(j,jj)= (COEF2*add(1,3)+ COEF3*add(3,1))/VOLU(IELEM)
-				D23(j,jj)= (COEF2*add(2,3)+ COEF3*add(3,2))/VOLU(IELEM)
-				DFP(j,jj)= (AUX4*(add(1,1)+add(2,2)+ add(3,3)))/VOLU(IELEM)
-				
-				K(j,jj)=COEFt*(add(1,1)+add(2,2)+add(3,3))/VOLU(IELEM)
-
-				KRH(j,jj)=COEFm*(add(1,1)+add(2,2)+add(3,3))/VOLU(IELEM)
-
-			  end do
-			end do
-
-			call syncthreads()
-	
-			do i=1,8
-
-			  LRUNP=-dot_product(adv(:,i)+d11(:,i),uvwp(:,1))-dot_product(d12(:,i),uvwp(:,2)) &
-					-dot_product(d13(:,i),uvwp(:,3)) +(1.0D0/RHOInf)*dot_product(ag1(i,:),uvwp(:,4))	
-			
-			  LRVNP=-dot_product(adv(:,i)+d22(:,i),uvwp(:,2))-dot_product(d12(i,:),uvwp(:,1))&
-					-dot_product(d23(:,i),uvwp(:,3))+(1.0D0/RHOInf)*dot_product(ag2(i,:),uvwp(:,4))
-
-			  LRWNP=-dot_product(adv(:,i)+d33(:,i),uvwp(:,3)) -dot_product(d13(i,:),uvwp(:,1))&
-					-dot_product(d23(i,:),uvwp(:,2))+(1.0D0/RHOInf)*dot_product(ag3(i,:),uvwp(:,4))
-			
-			  LRPNP=-AuxADV*dot_product(adv(:,i),uvwp(:,4)) -Aux*(dot_product(ag1(:,i),uvwp(:,1))+&		! PROBLEMA NESTE TRECHO
-							dot_product(ag2(:,i),uvwp(:,2))+ dot_product(ag3(:,i),uvwp(:,3)))-&
-							dot_product(dfp(:,i),uvwp(:,4))
-			
-			  MRP=dot_product(maslp(:,i),uvwt(:,4))
-			
-			!  if (IELEM .EQ. 10548) then
-
-				!write(*,*) 'Laco 19 - Const', AuxADV, Aux		! OK
-				!write(*,*) 'Laco 19 - MRP', uvwt(1,4), uvwt(2,4) , uvwt(3,4) , uvwt(4,4)		! OK
-				!write(*,*) 'Laco 19 - MRP', uvwt(5,4), uvwt(6,4) , uvwt(7,4) , uvwt(8,4)		! OK
-			!	write(*,*) LRPNP
-			! end if
-			
-			  rru(IELEM,i)=Delt * LRUNP
-			  rrv(IELEM,i)=Delt * LRVNP
-			  rrw(IELEM,i)=Delt * LRWNP
-			  rrp(IELEM,i)=MRP + Delt * LRPNP
-			
-			 !if (IELEM .GE. 5895 .and. IELEM .LE. 5910) then
-			
-			!	write(*,*) 'Laco 19 - Pressao', IELEM
-			!	write(*,*) rrp(IELEM,I), MRP, Delt, LRPNP
-			
-			!  end if
-			
-			end do
-
-		end if
+	if (IELEM <= CONT)	then
+		
+		ii= (IELEM-1)*8
+		
 		call syncthreads()
+		   
+		do j=1,8
+		  uvwp(j,1) = uvwa(1,kone(ii+j))				!!!! AQUI TEM-SE UM PROBLEMA DE MEM�RIA
+		  uvwp(j,2) = uvwa(2,kone(ii+j))
+		  uvwp(j,3) = uvwa(3,kone(ii+j))
+		  uvwp(j,4) = uvwa(4,kone(ii+j))
+	
+		  uvwt(j,4) = uvw(4,kone(ii+j))					!!! Verificar a necessidade desta opera��o
+		
+			!if (IELEM .EQ. 10548) then
+			!	write(*,*) 'L19-uvwt', kone(ii+j), uvw(4,kone(ii+j)), uvwt(j,4)
+			!	write(*,*)
+			!	write(*,*) 'uvwp1 - 20610', kone(20610), uvwa(1,20610)
+			!	write(*,*) 'L19- uvwp1', kone(ii+j), uvwa(1,kone(ii+j)), uvwp(j,1)
+			!	write(*,*) 'L19- uvwp2', kone(ii+j), uvwa(2,kone(ii+j)), uvwp(j,2)
+			!	write(*,*) 'L19- uvwp3', kone(ii+j), uvwa(3,kone(ii+j)), uvwp(j,3)
+			!	write(*,*) 'L19- uvwp4', kone(ii+j), uvwa(4,kone(ii+j)), uvwp(j,4)	
+			!end if
+		end do
+		
+		VC= VOLU(IELEM)*0.015625D0
+
+		mass=vc*transpose(mmm)
+		masd=volu(ielem)/8.0d0
+		maslp=(1.0d0-elump1)*mass	
+
+		!if (IELEM .EQ. 10548) then
+		!		write(*,*) 'L19- maslp', maslp(1,1), maslp(2,2), maslp(3,3), maslp(4,4)
+		!		write(*,*) 'L19- maslp', maslp(5,5), maslp(6,6), maslp(7,7), maslp(8,8)
+		!end if
+		
+		maslt=(1.0d0-elump2)*mass						                
+		maslm=(1.0d0-elump3)*mass						                
+		do i=1,8
+		  maslp(i,i)=maslp(i,i)+elump1*masd				                
+		  maslt(i,i)=maslt(i,i)+elump2*masd				                
+		  maslm(i,i)=maslm(i,i)+elump3*masd				                
+		end do
+
+		Aux = RHOInf*(VelSom**2)
+		AuxADV = 0.0D0
+
+		Prtl = RHOInf*Cv*ViscCin/Kdif
+		Schi = ViscCin/Dab
+
+		if(IndTurb.eq.0) then
+			auxv = ViscCin
+		  !auxt = ViscCin/Prtl 										    
+		  !auxm = ViscCin/Schi											
+		else 
+			auxv = (ViscCin + VDTurb(IELEM))
+		  !auxt = ViscCin/Prtl + VDTurb(IELEM)/Prtlt						
+		  !auxm = ViscCin/Schi + VDTurb(IELEM)/Schit						 
+		
+			IF(auxv.LT.1.00D0*ViscCin) 		auxv = 1.00D0*ViscCin																										
+		  !IF(auxt.LT.1.00D0*ViscCin/Prtl)	auxt = 1.00D0*ViscCin/Prtl				
+		  !IF(auxm.LT.1.00D0*ViscCin/Schi)    auxm = 1.00D0*ViscCin/Schi		
+		end if
+			 
+		COEF1= 2.0D0 * auxv + ViscVol
+		COEF2= auxv 
+		COEF3= ViscVol         
+		COEFt= 1.0d0/(RHOInf*Cv)*auxt								
+		COEFm= auxm													
+		AUX4 = 0.0D0
+	!   ---------------------------------------------------------------------------
+	!                        Chg dado pelo criterio CHRISTON 
+	!   ---------------------------------------------------------------------------
+
+		CHG= (VOLU(IELEM)**(1.0D0/3.D0))*1.0D0*0.5D0*VOLU(IELEM)*(1.0D0-(VNVX**(1.D0/3.D0)))*CONTROL1
+
+		jbb(1,1) = JIN(1,IELEM) * DETERJ(IELEM)
+		jbb(1,2) = JIN(2,IELEM) * DETERJ(IELEM)
+		jbb(1,3) = JIN(3,IELEM) * DETERJ(IELEM)
+		jbb(2,1) = JIN(4,IELEM) * DETERJ(IELEM)
+		jbb(2,2) = JIN(5,IELEM) * DETERJ(IELEM)
+		jbb(2,3) = JIN(6,IELEM) * DETERJ(IELEM)
+		jbb(3,1) = JIN(7,IELEM) * DETERJ(IELEM)
+		jbb(3,2) = JIN(8,IELEM) * DETERJ(IELEM)
+		jbb(3,3) = JIN(9,IELEM) * DETERJ(IELEM)
+
+		jbt=transpose(jbb)
+
+		do j=1,8
+		  do jj=1,8
+
+			AG1(jj,J)=(jbb(1,1)*TB1(jj,J)+jbb(1,2)*TB2(jj,J)+jbb(1,3)*TB3(jj,J))*.125D0
+			AG2(jj,J)=(jbb(2,1)*TB1(jj,J)+jbb(2,2)*TB2(jj,J)+ jbb(2,3)*TB3(jj,J))*.125D0
+			AG3(jj,J)=(jbb(3,1)*TB1(jj,J)+jbb(3,2)*TB2(jj,J)+ jbb(3,3)*TB3(jj,J))*.125D0
+		
+		 end do
+		end do
+		
+		do j=1,8
+		  do jj=1,8
+		
+			jjj=jj*3
+			b123(jjj-2,j)=(jbb(1,1)*BB1(jj,J)+jbb(1,2)*BB2(jj,J)+ jbb(1,3)*BB3(jj,J))*.125D0
+			b123(jjj-1,j)=(jbb(2,1)*BB1(jj,J)+jbb(2,2)*BB2(jj,J)+ jbb(2,3)*BB3(jj,J))*.125D0
+			b123(jjj,j)  =(jbb(3,1)*BB1(jj,J)+jbb(3,2)*BB2(jj,J)+ jbb(3,3)*BB3(jj,J))*.125D0
+
+			adv(j,jj)=b123(jjj-2,J)*uvwprom(1,ielem)+ b123(jjj-1,J)*uvwprom(2,ielem)+&
+					  b123(jjj,J)*uvwprom(3,ielem)
+					  
+		  end do
+		end do
+		
+		do j=1,8
+		  do jj=1,8
+		  
+			dd(1,1) = dd11(jj,j)
+			dd(1,2) = dd12(jj,j)
+			dd(1,3) = dd13(jj,j)
+			dd(2,1) = dd21(jj,j)
+			dd(2,2) = dd22(jj,j)
+			dd(2,3) = dd23(jj,j)
+			dd(3,1) = dd31(jj,j)
+			dd(3,2) = dd32(jj,j)
+			dd(3,3) = dd33(jj,j)
+	 
+			! Primeiro matmul (jbb x dd)
+			jbb_dd(1,1) = jbb(1,1)*dd(1,1)+jbb(1,2)*dd(2,1)+jbb(1,3)*dd(3,1)
+			jbb_dd(1,2) = jbb(1,1)*dd(1,2)+jbb(1,2)*dd(2,2)+jbb(1,3)*dd(3,2)
+			jbb_dd(1,3) = jbb(1,1)*dd(1,3)+jbb(1,2)*dd(2,3)+jbb(1,3)*dd(3,3)
+			
+			jbb_dd(2,1) = jbb(2,1)*dd(1,1)+jbb(2,2)*dd(2,1)+jbb(2,3)*dd(3,1)
+			jbb_dd(2,2) = jbb(2,1)*dd(1,2)+jbb(2,2)*dd(2,2)+jbb(2,3)*dd(3,2)
+			jbb_dd(2,3) = jbb(2,1)*dd(1,3)+jbb(2,2)*dd(2,3)+jbb(2,3)*dd(3,3)
+			
+			jbb_dd(3,1) = jbb(3,1)*dd(1,1)+jbb(3,2)*dd(2,1)+jbb(3,3)*dd(3,1)
+			jbb_dd(3,2) = jbb(3,1)*dd(1,2)+jbb(3,2)*dd(2,2)+jbb(3,3)*dd(3,2)
+			jbb_dd(3,3) = jbb(3,1)*dd(1,3)+jbb(3,2)*dd(2,3)+jbb(3,3)*dd(3,3)
+			
+			! Segundo matmul (jbb_dd x jbt)	---	add = matmul(jbb_dd,jbt)
+			
+			add(1,1) = jbb_dd(1,1)*jbt(1,1)+jbb_dd(1,2)*jbt(2,1)+jbb_dd(1,3)*jbt(3,1)
+			add(1,2) = jbb_dd(1,1)*jbt(1,2)+jbb_dd(1,2)*jbt(2,2)+jbb_dd(1,3)*jbt(3,2)
+			add(1,3) = jbb_dd(1,1)*jbt(1,3)+jbb_dd(1,2)*jbt(2,3)+jbb_dd(1,3)*jbt(3,3)
+			
+			add(2,1) = jbb_dd(2,1)*jbt(1,1)+jbb_dd(2,2)*jbt(2,1)+jbb_dd(2,3)*jbt(3,1)
+			add(2,2) = jbb_dd(2,1)*jbt(1,2)+jbb_dd(2,2)*jbt(2,2)+jbb_dd(2,3)*jbt(3,2)
+			add(2,3) = jbb_dd(2,1)*jbt(1,3)+jbb_dd(2,2)*jbt(2,3)+jbb_dd(2,3)*jbt(3,3)
+			
+			add(3,1) = jbb_dd(3,1)*jbt(1,1)+jbb_dd(3,2)*jbt(2,1)+jbb_dd(3,3)*jbt(3,1)
+			add(3,2) = jbb_dd(3,1)*jbt(1,2)+jbb_dd(3,2)*jbt(2,2)+jbb_dd(3,3)*jbt(3,2)
+			add(3,3) = jbb_dd(3,1)*jbt(1,3)+jbb_dd(3,2)*jbt(2,3)+jbb_dd(3,3)*jbt(3,3)
+			!
+			
+			add(1,1) = add(1,1) +chg*hourg(jj,j)
+			add(2,2) = add(2,2) +chg*hourg(jj,j)
+			add(3,3) = add(3,3) +chg*hourg(jj,j)
+			
+			call syncthreads()
+
+			D11(j,jj)= (COEF1*add(1,1)+ COEF2*(add(2,2)+add(3,3)))/VOLU(IELEM)
+			D22(j,jj)= (COEF1*add(2,2)+ COEF2*(add(3,3)+add(1,1)))/VOLU(IELEM)
+			D33(j,jj)= (COEF1*add(3,3)+ COEF2*(add(1,1)+add(2,2)))/VOLU(IELEM)
+			D12(j,jj)= (COEF2*add(1,2)+ COEF3*add(2,1))/VOLU(IELEM)
+			D13(j,jj)= (COEF2*add(1,3)+ COEF3*add(3,1))/VOLU(IELEM)
+			D23(j,jj)= (COEF2*add(2,3)+ COEF3*add(3,2))/VOLU(IELEM)
+			DFP(j,jj)= (AUX4*(add(1,1)+add(2,2)+ add(3,3)))/VOLU(IELEM)
+			
+			K(j,jj)=COEFt*(add(1,1)+add(2,2)+add(3,3))/VOLU(IELEM)
+
+			KRH(j,jj)=COEFm*(add(1,1)+add(2,2)+add(3,3))/VOLU(IELEM)
+
+		  end do
+		end do
+		
+		call syncthreads()
+	
+		do i=1,8
+
+		  LRUNP=-dot_product(adv(:,i)+d11(:,i),uvwp(:,1))-dot_product(d12(:,i),uvwp(:,2)) &
+				-dot_product(d13(:,i),uvwp(:,3)) +(1.0D0/RHOInf)*dot_product(ag1(i,:),uvwp(:,4))	
+	 
+		  LRVNP=-dot_product(adv(:,i)+d22(:,i),uvwp(:,2))-dot_product(d12(i,:),uvwp(:,1))&
+				-dot_product(d23(:,i),uvwp(:,3))+(1.0D0/RHOInf)*dot_product(ag2(i,:),uvwp(:,4))
+
+		  LRWNP=-dot_product(adv(:,i)+d33(:,i),uvwp(:,3)) -dot_product(d13(i,:),uvwp(:,1))&
+				-dot_product(d23(i,:),uvwp(:,2))+(1.0D0/RHOInf)*dot_product(ag3(i,:),uvwp(:,4))
+	 
+		  LRPNP=-AuxADV*dot_product(adv(:,i),uvwp(:,4)) -Aux*(dot_product(ag1(:,i),uvwp(:,1))+&		! PROBLEMA NESTE TRECHO
+						dot_product(ag2(:,i),uvwp(:,2))+ dot_product(ag3(:,i),uvwp(:,3)))-&
+						dot_product(dfp(:,i),uvwp(:,4))
+		
+		  MRP=dot_product(maslp(:,i),uvwt(:,4))
+		  
+		!  if (IELEM .EQ. 10548) then
+			
+			!write(*,*) 'Laco 19 - Const', AuxADV, Aux		! OK
+			!write(*,*) 'Laco 19 - MRP', uvwt(1,4), uvwt(2,4) , uvwt(3,4) , uvwt(4,4)		! OK
+			!write(*,*) 'Laco 19 - MRP', uvwt(5,4), uvwt(6,4) , uvwt(7,4) , uvwt(8,4)		! OK
+		!	write(*,*) LRPNP
+		! end if
+		  		  
+		  rru(IELEM,i)=Delt * LRUNP
+		  rrv(IELEM,i)=Delt * LRVNP
+		  rrw(IELEM,i)=Delt * LRWNP
+		  rrp(IELEM,i)=MRP + Delt * LRPNP
+		  
+		 !if (IELEM .GE. 5895 .and. IELEM .LE. 5910) then
+		  
+		!	write(*,*) 'Laco 19 - Pressao', IELEM
+		!	write(*,*) rrp(IELEM,I), MRP, Delt, LRPNP
+		 
+		!  end if
+		  
+		end do
+		
+	end if
+	call syncthreads()
 	end subroutine laco_19
 	
 	!!! La�o 20 - IMPLEMENTAR PARA PROBLEMAS COM COND. DE CONTORNO NA EQ. DE MOMENTO
@@ -1667,7 +1665,7 @@ contains
 
 		call syncthreads()
 	
-		!!! La�o 22
+	!!! La�o 22
 	
 		if (I <= CONT) then
 	
@@ -1683,64 +1681,64 @@ contains
 	!!! La�o 23- Imposi��o das condi��es de contorno do problema - Vai de u a p
 	!______________________________________________________________________________________________
 	attributes (global) subroutine Impose_CC_2(uvw, IBCU, BCU, IBCV, BCV, IBCW, BCW, IBCP, BCP)
-		!attributes (global) subroutine laco_23(uvw, NBCU, IBCU, BCU, NBCV, IBCV, BCV, NBCW, IBCW, BCW, &
-		!									   NBCP, IBCP, BCP)
-		implicit none
-		real(4)				:: uvw(:,:)
-		real(4)				:: BCU(:), BCV(:), BCW(:), BCP(:)
-		integer				:: IBCU(:), IBCV(:), IBCW(:), IBCP(:)
-		integer, device		:: I, NNO
+	!attributes (global) subroutine laco_23(uvw, NBCU, IBCU, BCU, NBCV, IBCV, BCV, NBCW, IBCW, BCW, &
+	!									   NBCP, IBCP, BCP)
+	implicit none
+	real(4)				:: uvw(:,:)
+	real(4)				:: BCU(:), BCV(:), BCW(:), BCP(:)
+	integer				:: IBCU(:), IBCV(:), IBCW(:), IBCP(:)
+	integer, device		:: I, NNO
 	
-		I = (blockIdx%x-1)*blockDim%x + threadIdx%x	
+	I = (blockIdx%x-1)*blockDim%x + threadIdx%x	
 
-		if (I <= MAX(NBUd, NBVd, NBWd, NBPd))	then 
-		!______________________________________________________________________________________________
-		if (NBUd .NE.0 .and. I <= NBUd) then
-			NNO= IBCU(I)
-			UVW(1,NNO)= BCU(I)
-		end if
-		!______________________________________________________________________________________________	
-		if (NBVd.NE.0 .and. I <= NBVd) then
-			NNO= IBCV(I)
-			UVW(2,NNO)= BCV(I)
-		end if
+	if (I <= MAX(NBUd, NBVd, NBWd, NBPd))	then 
+	!______________________________________________________________________________________________
+	if (NBUd .NE.0 .and. I <= NBUd) then
+		NNO= IBCU(I)
+		UVW(1,NNO)= BCU(I)
+	end if
+	!______________________________________________________________________________________________	
+	if (NBVd.NE.0 .and. I <= NBVd) then
+		NNO= IBCV(I)
+		UVW(2,NNO)= BCV(I)
+	end if
 	
-		!______________________________________________________________________________________________	
-		if (NBWd .NE.0 .and. I <= NBWd) then
-			NNO= IBCW(I)
-			UVW(3,NNO)= BCW(I)
-		end if	
-		!______________________________________________________________________________________________
-		if (NBPd.NE.0 .and. I <= NBPd) then						! N�O H� CONDI��ES DE CONTORNO PARA A PRESS�O
-			NNO= IBCP(I)
-			UVW(4,NNO)= BCP(I)
-		end if
-		end if
-		call syncthreads()
+	!______________________________________________________________________________________________	
+	if (NBWd .NE.0 .and. I <= NBWd) then
+		NNO= IBCW(I)
+		UVW(3,NNO)= BCW(I)
+	end if	
+	!______________________________________________________________________________________________
+	if (NBPd.NE.0 .and. I <= NBPd) then						! N�O H� CONDI��ES DE CONTORNO PARA A PRESS�O
+		NNO= IBCP(I)
+		UVW(4,NNO)= BCP(I)
+	end if
+	end if
+	call syncthreads()
 	end subroutine Impose_CC_2
 	
 	!!! La�o 24 - Suaviza��es n�vel de elemento
 	
 	attributes (global) subroutine laco_24(kone, uvw, VOLU, PPROME, Vtaux, VDTurb)
-		implicit none
-		integer			:: kone(:)
-		real(4)			:: uvw(:,:)
-		real(4)			:: VOLU(:), PPROME(:), Vtaux(:), VDTurb(:)
-		integer, device	:: IELEM, CONT
+	implicit none
+	integer			:: kone(:)
+	real(4)			:: uvw(:,:)
+	real(4)			:: VOLU(:), PPROME(:), Vtaux(:), VDTurb(:)
+	integer, device	:: IELEM, CONT
 	
-		IELEM = (blockIdx%x-1)*blockDim%x + threadIdx%x	
-		CONT = size(VOLU)
+	IELEM = (blockIdx%x-1)*blockDim%x + threadIdx%x	
+	CONT = size(VOLU)
 	
-		if (IELEM <= CONT) then
+	if (IELEM <= CONT) then
 	
-			PPROME(IELEM)=(uvw(4,KONE((IELEM-1)*8+1))+uvw(4,KONE((IELEM-1)*8+2))+uvw(4,KONE((IELEM-1)*8+3))+&
-						   uvw(4,KONE((IELEM-1)*8+4))+uvw(4,KONE((IELEM-1)*8+5))+uvw(4,KONE((IELEM-1)*8+6))+&
-						   uvw(4,KONE((IELEM-1)*8+7))+uvw(4,KONE((IELEM-1)*8+8)))*VOLU(IELEM)* 0.015625D0
+		PPROME(IELEM)=(uvw(4,KONE((IELEM-1)*8+1))+uvw(4,KONE((IELEM-1)*8+2))+uvw(4,KONE((IELEM-1)*8+3))+&
+					   uvw(4,KONE((IELEM-1)*8+4))+uvw(4,KONE((IELEM-1)*8+5))+uvw(4,KONE((IELEM-1)*8+6))+&
+					   uvw(4,KONE((IELEM-1)*8+7))+uvw(4,KONE((IELEM-1)*8+8)))*VOLU(IELEM)* 0.015625D0
 
-			Vtaux(IELEM)   = VDTurb(IELEM) * VOLU(IELEM) * 0.125D0	
+		Vtaux(IELEM)   = VDTurb(IELEM) * VOLU(IELEM) * 0.125D0	
 	
-		end if
-		call syncthreads()
+	end if
+	call syncthreads()
 	end subroutine laco_24
 	
 	!!! La�o 25 - Suaviza��es n�vel nodal
@@ -1787,30 +1785,29 @@ contains
 	
 	attributes (global) subroutine laco_26(uvw, PASSMED, VtSuav, PRSuav, Umed, Vmed, Wmed, &
 										   PRmed, VTmed, PRSmed)
-		implicit none
-		real(4)			:: uvw(:,:), VtSuav(:), PRSuav(:), Umed(:), Vmed(:), Wmed(:), PRmed(:), VTmed(:), &
-						   PRSmed(:)
-		real(4) 		:: PASSMED
-		integer, device :: I, CONT
-		
-		I = (blockIdx%x-1)*blockDim%x + threadIdx%x
-		CONT = size(uvw,2)
-		
-		if (I <= CONT) then
-		
-		  Umed(I) = Umed(I) + uvw(1,I)/PASSMED
-	      Vmed(I) = Vmed(I) + uvw(2,I)/PASSMED
-	      Wmed(I) = Wmed(I) + uvw(3,I)/PASSMED
-	      PRmed(I) = PRmed(I) + uvw(4,I)/PASSMED
-	      VTmed(I) = VTmed(I) + VtSuav(I)/PASSMED
-	      PRSmed(I) = PRSmed(I) + PRSuav(I)/PASSMED
-		
-		end if
-		call syncthreads()
-		end subroutine laco_26
-		
-	end module Device_Loops
-
+	implicit none
+	real(4)			:: uvw(:,:), VtSuav(:), PRSuav(:), Umed(:), Vmed(:), Wmed(:), PRmed(:), VTmed(:), &
+					   PRSmed(:)
+	real(4) 		:: PASSMED
+	integer, device :: I, CONT
+	
+	I = (blockIdx%x-1)*blockDim%x + threadIdx%x
+	CONT = size(uvw,2)
+	
+	if (I <= CONT) then
+	
+	  Umed(I) = Umed(I) + uvw(1,I)/PASSMED
+      Vmed(I) = Vmed(I) + uvw(2,I)/PASSMED
+      Wmed(I) = Wmed(I) + uvw(3,I)/PASSMED
+      PRmed(I) = PRmed(I) + uvw(4,I)/PASSMED
+      VTmed(I) = VTmed(I) + VtSuav(I)/PASSMED
+      PRSmed(I) = PRSmed(I) + PRSuav(I)/PASSMED
+	  
+	end if
+	call syncthreads()
+	end subroutine laco_26
+	
+end module Device_Loops
 
 program CUDA_HEXA_IGOR
 ! ------------------------------------------------------------------------------
