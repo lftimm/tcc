@@ -1153,6 +1153,7 @@ program Interface_Gmsh_Hexa
                 write(*,100) nquad, nquad, i, nhexa, 100 * real(nquad + i) / real(nquad + nhexa)
                 
 				! TODO - Armazenar a conectividade dos elementos
+                print *, i
 				read (102, *) garbi, garbi, garbi, garbi, garbi, n1, n2, n3, n4, n5, n6, n7, n8 ! n1, n2, n3, n4, n5, n6, n7 e n8 sao os nós do elemento
 				write (203, 14) n1, n2, n3, n4, n5, n6, n7, n8
 				

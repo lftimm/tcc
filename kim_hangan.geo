@@ -1,5 +1,5 @@
 // CONFIGURAÇÕES
-Djet = 0.0381;
+Djet = 1.0;
 Zjet = 4*Djet;
 splitHeight = 0.45*Zjet;
 dz = Djet/10;
@@ -123,34 +123,38 @@ Physical Surface("Pressure Outlet", 133) = {surf_outlet_hori[],surf_outlet_vert[
 Physical Surface("ExtrusionPlanes", 134) = {planos_z0[], planos_zdz[]};
 Physical Volume("Fluid", 135) = {todos_volumes[]};
 //+
-Show "*";
+Physical Surface(" Wall", 129) -= {79, 105};
 //+
-Show "*";
+Physical Surface(" Slip Wall", 130) -= {27};
 //+
-Hide "*";
+Physical Surface(" Impinging Jet", 131) -= {128};
 //+
-Show {
-  Point{1}; Point{6}; Point{13}; Point{35}; Point{39}; Point{40}; Curve{17}; Curve{18}; Curve{66}; Curve{74}; Curve{78}; Curve{89}; Curve{91}; Surface{79}; Surface{105}; 
-}
+Physical Surface(" Impinging Jet", 131) -= {119};
 //+
-Hide "*";
+Physical Surface(" Radius center", 132) -= {115, 93};
 //+
-Show {
-  Point{1}; Point{6}; Point{13}; Point{35}; Point{39}; Point{40}; Curve{17}; Curve{18}; Curve{66}; Curve{74}; Curve{78}; Curve{89}; Curve{91}; Surface{79}; Surface{105}; 
-}
+Physical Surface(" Pressure Outlet", 133) -= {31, 35};
 //+
-Show "*";
+Physical Surface(" Pressure Outlet", 133) -= {31, 35};
 //+
-Show "*";
+Physical Surface(" Pressure Outlet", 133) -= {49, 83};
 //+
-Hide "*";
+Physical Surface(" ExtrusionPlanes", 134) -= {40, 5, 62, 4, 84, 3, 2, 106, 128, 1};
 //+
-Show {
-  Point{4}; Point{5}; Point{6}; Point{9}; Point{11}; Point{15}; Point{19}; Point{23}; Point{25}; Point{39}; Curve{5}; Curve{6}; Curve{7}; Curve{8}; Curve{21}; Curve{22}; Curve{26}; Curve{30}; Curve{34}; Curve{42}; Curve{48}; Curve{67}; Curve{78}; Surface{31}; Surface{35}; Surface{49}; Surface{83}; 
-}
+Physical Volume(" Fluid", 135) -= {1, 2, 3, 4, 5};
 //+
-Hide "*";
+Physical Surface("Impinging Jet", 1) = {119};
 //+
-Show {
-  Point{4}; Point{5}; Point{6}; Point{9}; Point{11}; Point{15}; Point{19}; Point{23}; Point{25}; Point{39}; Curve{5}; Curve{6}; Curve{7}; Curve{8}; Curve{21}; Curve{22}; Curve{26}; Curve{30}; Curve{34}; Curve{42}; Curve{48}; Curve{67}; Curve{78}; Surface{31}; Surface{35}; Surface{49}; Surface{83}; 
-}
+Physical Surface("Wall", 2) = {105, 79};
+//+
+Physical Surface("Slip Wall", 3) = {27};
+//+
+Physical Surface("Pressure Outlet", 3) += {31, 35, 49, 83};
+//+
+Physical Surface("Radius", 4) = {115, 93};
+//+
+Physical Surface("Extrusion", 5) = {5, 40, 62, 4, 1, 128, 106, 2, 84, 3};
+//+
+Physical Surface("Pressure Outlet", 6) = {31, 35, 49, 83};
+//+
+Physical Volume("Fluid", 7) = {1, 2, 3, 4, 5};
