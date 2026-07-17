@@ -423,7 +423,6 @@ program Interface_Gmsh_Hexa
 	write (201, 8) 1.0 !CONTROL1
 	write (201, 7) NPASS
 	write (201, 7) INDTURB
-	write (201, 7) inflowTurb
 	write (201, 8) 0.9 !ELUMP1
 	write (201, 8) 0.9 !ELUMP2
 	write (201, 8) 0.9 !ELUMP3
