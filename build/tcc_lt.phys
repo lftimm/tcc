@@ -13,7 +13,7 @@
 !	Log = Número de CC do tipo Lei Logarítmica - NÃO IMPLEMENTADO
 ! **********************************
 $GroupCount
-6	9	1	0	0
+6	12	1	0	0
 $EndGroupCount
 ! **********************************
 ! Especificação do tipo de condição de contorno (CC)
@@ -36,8 +36,8 @@ $EndGroupCount
 $GroupType
 1	1	2	1	0
 2	1	1	1	0
-3	1	0	0	0
-4	1	0	0	0
+3	1	0	1	0
+4	1	0	1	0
 5	0	0	1	0
 6	0	0	0	1
 $EndGroupType
