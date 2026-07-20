@@ -1,0 +1,124 @@
+! *************************************************	!
+! 	Arquivo de condições de contorno do problema	!
+! *************************************************	!
+
+! **********************************
+! Número de grupos físicos do modelo
+! 	Formato:
+!		N	Null	Const	Power	Log
+!	N = Número total de grupos
+!	Null = Número de CC do tipo Nulo
+!	Const = Número de CC do tipo Constante
+!	Power = Número de CC do tipo Lei de Potência
+!	Log = Número de CC do tipo Lei Logarítmica - NÃO IMPLEMENTADO
+! **********************************
+$GroupCount
+9	18	0	1	0
+$EndGroupCount
+! **********************************
+! Especificação do tipo de condição de contorno (CC)
+! 	Formato:
+!		N	V1	V2	V3	P
+!	N = Número do grupo
+!	V1 = Tipo de condição para Velocidade 1 ou X
+!	V2 = Tipo de condição para Velocidade 2 ou Y
+!	V3 = Tipo de condição para Velocidade 3 ou Z
+!	P = Tipo de condição para Pressão
+!
+! Possiveis tipos de condição:
+!	0 = Livre
+!	1 = Nulo
+!	2 = Constante
+!	3 = Lei de Potência
+!	4 = Lei Logarítmica
+!		*OBS: Atualmente apenas V1 e V3 podem ter Lei de Potência ou Logaritmica
+! **********************************
+$GroupType
+1	3	1	1	0
+2	0	0	0	1
+3	1	1	1	0
+4	0	0	1	0
+5	0	1	0	0
+6	0	1	0	0
+7	1	1	1	0
+8	1	1	1	0
+9	1	1	1	0
+$EndGroupType
+! **********************************
+! Especificação do valor para CC constante
+!	Formato:
+!		Value
+!	Value = Valor da CC
+!		*OBS: Os valores devem estar na mesma ordem que estão no $GroupType (linha a linha, esquerda pra direita)
+! **********************************
+$ConstantValues
+$EndConstantValues
+! **********************************
+! Especificação do valor para CC por Lei de Potência
+!	Formato:
+!		Vref	zd	zref	p
+!	Vref = Valor da CC na cota zref
+!	zd = Cota onde o perfil começa e tem valor 0
+!	zref = Cota de referência
+!	p = Expoente da Lei de Potência
+!		*OBS: Os valores devem estar na mesma ordem que estão no $GroupType (linha a linha, esquerda pra direita)
+!		*OBS: Lei de Potência aumenta com y positivo
+! **********************************
+$PowerLawValues
+10.0d0	0.0d0	10.0d0	0.085d0
+$EndPowerLawValues
+! **********************************
+! Especificação do valor para CC por Lei Logarítmica
+!	Formato:
+!		u*	zd	z0
+!	u* = Velocidade de corte
+!	zd = Cota onde o perfil começa e tem valor 0
+!	z0 = Cota da rugosidade aerodinâmica
+!		*OBS: Os valores devem estar na mesma ordem que estão no $GroupType (linha a linha, esquerda pra direita)
+!		*OBS: A constante de Von Kármán k é adotada como 0,4
+!		*OBS: Lei Logarítmica aumenta com y positivo
+! **********************************
+$LogLawValues
+$EndLogLawValues
+! **********************************
+! Número de objetos submersos no modelo
+! 	Formato:
+!		N
+!	N = Número total de objetos submersos
+! **********************************
+$ObjectCount
+3
+$EndObjectCount
+! **********************************
+! Propriedades dos objetos submersos no modelo
+! 	Formato:
+!		Group
+!	Group = Número do grupo físico ao qual o objeto pertence
+!		*OBS: Um objeto não pode pertencer a mais de um grupo físico
+! **********************************
+$ObjectProp
+7
+8
+9
+$EndObjectProp
+! **********************************
+! Apresenta o número do grupo usado como base para o campo inicial de velocidade e pressão
+! Neste caso, CC livres são tratadas como nulas
+!	Formato:
+!		Group
+!	Group = Número do grupo físico usado como referência para os campos iniciais
+! **********************************
+$InitialFieldGroup
+2
+$EndInitialFieldGroup
+! **********************************
+! Apresenta o número do grupo onde há turbulência na entrada
+!	Formato:
+!		Group
+!	Group = Número do grupo físico onde há turbulência
+! **********************************
+$InflowTurbGroup
+0
+$EndInflowTurbGroup
+! É sempre necessário ter um $End no final do arquivo pro algoritmo saber onde parar
+$End
