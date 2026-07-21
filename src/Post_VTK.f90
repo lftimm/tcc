@@ -81,7 +81,7 @@ program Post_VTK
     filename(10:14) = ".vtk "
     OPEN(1, file=filename, status="unknown")
 
-    WRITE(1,*) "# vtk DataFile Version 2.0"
+    WRITE(1,'(A)') "# vtk DataFile Version 2.0"
     WRITE(1,*) "Unstructured Grid ", pname
     WRITE(1,*) "ASCII"
     WRITE(1,*) "DATASET UNSTRUCTURED_GRID"
