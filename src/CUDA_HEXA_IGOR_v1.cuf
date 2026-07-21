@@ -1829,7 +1829,7 @@ program CUDA_HEXA_IGOR
 ! 026_003 - Embankment
 PARAMETER (NEMAX=78784,NNOS=158742,&
            MNOBJ=0,NNCSX=6384,NFCSX=6125,&
-           NBU=2344,NBV=776,NBW=158192,NBP=1138,&
+           NBU=2344,NBV=776,NBW=158742,NBP=1138,&
 		   NCMAX=0, NNMAX=0)
 
 !*************************** DEFINICAO DOS PARAMETROS ******************************
