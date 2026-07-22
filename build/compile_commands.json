@@ -1,0 +1,14 @@
+[
+  {
+    "arguments": [
+      "/usr/bin/gfortran",
+      "-c",
+      "-o",
+      "./interface",
+      "../src/Interface_Gmsh_Hexa_v3.f90"
+    ],
+    "directory": "/home/tilt/p/tcc/build",
+    "file": "/home/tilt/p/tcc/src/Interface_Gmsh_Hexa_v3.f90",
+    "output": "/home/tilt/p/tcc/build/interface"
+  }
+]
