@@ -13,16 +13,16 @@ elementCoef = 500;
 // Face da frente
 Point(1) = {0,0,0,1.0};
 Point(2) = {0,Zjet,0,1.0};
-Point(3) = {0.5*Djet,Zjet,0,1.0};
-Point(4) = {0.5*Djet,10*Djet,0,1.0};
+Point(3) = {Djet,Zjet,0,1.0};
+Point(4) = {Djet,10*Djet,0,1.0};
 Point(5) = {10*Djet,10*Djet,0,1.0};
 Point(6) = {10*Djet,0,0,1.0};
 Point(7) = {0,splitHeight,0,0,1.0};
 Point(9) = {10*Djet,splitHeight,0,1.0};
 Point(10) = {10*Djet,splitHeight,0,1.0};
 Point(11) = {10*Djet,Zjet,0,1.0};
-Point(12) = {0.5*Djet,splitHeight,0,1.0};
-Point(13) = {0.5*Djet,0,0,1.0};
+Point(12) = {Djet,splitHeight,0,1.0};
+Point(13) = {Djet,0,0,1.0};
 
 Line(1) = {1, 7};
 Line(2) = {7, 2};
