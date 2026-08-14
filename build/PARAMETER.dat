@@ -1,0 +1,17 @@
+
+! NEMAX: Numero de elementos hexaedricos da malha;
+! NNOS: Numero de nos da malha;
+! MNOBJ: Numero de objetos imersos no escoamento;
+! NNCSX: Numero de nos de contorno solido;
+! NFCSX: Numero de faces de contorno solido;
+! NBU: Numero de nos com condicao de velocidade U;
+! NBV: Numero de nos com condicao de velocidade V;
+! NBW: Numero de nos com condicao de velocidade W;
+! NBP: Numero de nos com condicao de pressao;
+
+! tcc_lt
+PARAMETER (
+    NEMAX=86436, NNOS=174112, &
+    MNOBJ=0, NNCSX=0, NFCSX=0, &
+    NBU=1072, NBV=1024, NBW=174112, NBP=1164, &
+    NCMAX=0, NNMAX=0)

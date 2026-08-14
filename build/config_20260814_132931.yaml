@@ -1,0 +1,65 @@
+boundary_conditions:
+  1:
+    type: nodal
+    u: null
+    v: -10.0
+    w: null
+    p: null
+  2:
+    type: nodal
+    u: 0.0
+    v: 0.0
+    w: 0.0
+    p: null
+  3:
+    type: nodal
+    u: null
+    v: 0.0
+    w: null
+    p: null
+  4:
+    type: nodal
+    u: 0.0
+    v: null
+    w: null
+    p: null
+  5:
+    type: nodal
+    u: null
+    v: null
+    w: 0.0
+    p: null
+  6:
+    type: nodal
+    u: null
+    v: null
+    w: null
+    p: 0.0
+parameters:
+  NCOEF: 400
+  NIR: 15600
+  NTR: 1
+  NFILE: 0
+  DtMAX: 5.0e-05
+  TPOAC: 0.0
+  TOLTPO: 1.0e-06
+  NROTPO: 100
+  CSEGUR: 100.0
+  CONTROL1: 1.0
+  NPASS: 450000
+  INDTURB: 2
+  ELUMP1: 0.9
+  ELUMP2: 0.9
+  ELUMP3: 0.9
+  NTHREADS: 256
+fluid_properties:
+  VInf: 10.0
+  VelSom: 50.0
+  ViscCin: 0.00025
+  ViscVol: 0.0
+  RHOInf: 1.0
+  Cv: 1.0e-08
+  Kdif: 1.0e-08
+  Cs: 0.15
+  Prtlt: 1.0e-08
+  Dab: 1.0e-08
