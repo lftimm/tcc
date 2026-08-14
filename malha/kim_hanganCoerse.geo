@@ -7,14 +7,14 @@ dz = Djet/10;
 // Aqui usei este valor como o governante no tamanho da malha
 // Defini mais ou menos o tamanho da região onde ocorrem os vórtices
 // Usei proporções entre os diferentes elementos pra compor uma malha mais uniforme
-elementCoef = 350;
+elementCoef = 500;
 
 // GEOMETRIA
 // Face da frente
 Point(1) = {0,0,0,1.0};
 Point(2) = {0,Zjet,0,1.0};
-Point(3) = {Djet,Zjet,0,1.0};
-Point(4) = {Djet,10*Djet,0,1.0};
+Point(3) = {0.5*Djet,Zjet,0,1.0};
+Point(4) = {0.5*Djet,10*Djet,0,1.0};
 Point(5) = {10*Djet,10*Djet,0,1.0};
 Point(6) = {10*Djet,0,0,1.0};
 Point(7) = {0,splitHeight,0,0,1.0};
