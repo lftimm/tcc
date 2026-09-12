@@ -1,0 +1,74 @@
+#!/usr/bin/python3
+
+import subprocess
+import argparse
+import shutil
+import sys
+from datetime import datetime
+from pathlib import Path
+
+SRC_FILES = ("cuda_cfd.cuf", "interface.f90", "make_vtk.f90")
+DATE_FMT = "%d_%m-%H_%M"
+
+def parse_args():
+    parser = argparse.ArgumentParser(
+        description="Create a new timestamped experiment folder under expr/."
+    )
+    parser.add_argument(
+        "geo_file",
+        type=Path,
+        help="Path to the .geo mesh file (for gmsh) to include in the experiment folder",
+    )
+    return parser.parse_args()
+
+
+def main():
+    args = parse_args()
+    geo_file = args.geo_file
+
+    if geo_file.suffix != ".geo":
+        sys.exit(f"error: '{geo_file}' is not a .geo file")
+    if not geo_file.is_file():
+        sys.exit(f"error: geo file not found: '{geo_file}'")
+
+    project_root = Path(__file__).resolve().parent
+    src_dir = project_root / "src"
+    makefile = project_root / "Makefile"
+
+    interface_dat = src_dir / "INTERFACE.dat"
+    tcc_lt_phys = src_dir / "tcc_lt.phys"
+    submit_slurm = src_dir / "submit.slurm"
+
+    for filename in SRC_FILES:
+        if not (src_dir / filename).is_file():
+            sys.exit(f"error: expected source file missing: '{src_dir / filename}'")
+    if not makefile.is_file():
+        sys.exit(f"error: Makefile not found: '{makefile}'")
+
+    expr_root = project_root / "expr"
+    expr_root.mkdir(exist_ok=True)
+
+    timestamp = datetime.now().strftime(DATE_FMT)
+    expr_dir = expr_root / timestamp
+    expr_dir.mkdir(parents=True, exist_ok=False)
+
+    exp_src_dir = expr_dir / "src"
+    exp_src_dir.mkdir()
+
+    for filename in SRC_FILES:
+        shutil.copy(str(src_dir / filename), str(exp_src_dir / filename))
+
+    shutil.copy(makefile, expr_dir / makefile.name)
+    shutil.copy(geo_file, expr_dir / "tcc_lt.geo")
+
+    shutil.copy(interface_dat, expr_dir / interface_dat.name)
+    shutil.copy(tcc_lt_phys, expr_dir / tcc_lt_phys.name)
+    shutil.copy(submit_slurm, src_dir / submit_slurm.name)
+
+    print(f"experiment created: {expr_dir}")
+
+    subprocess.run(["make", "-C", str(expr_dir), "mesh", "interface"])
+
+
+if __name__ == "__main__":
+    main()
