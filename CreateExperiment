@@ -34,10 +34,11 @@ def main():
     project_root = Path(__file__).resolve().parent
     src_dir = project_root / "src"
     makefile = project_root / "Makefile"
+    submit_slurm = project_root / "submit.slurm"
 
     interface_dat = src_dir / "INTERFACE.dat"
     tcc_lt_phys = src_dir / "tcc_lt.phys"
-    submit_slurm = src_dir / "submit.slurm"
+    build_vtks = src_dir / "build_vtks.sh"
 
     for filename in SRC_FILES:
         if not (src_dir / filename).is_file():
@@ -63,7 +64,8 @@ def main():
 
     shutil.copy(interface_dat, expr_dir / interface_dat.name)
     shutil.copy(tcc_lt_phys, expr_dir / tcc_lt_phys.name)
-    shutil.copy(submit_slurm, src_dir / submit_slurm.name)
+    shutil.copy(submit_slurm, expr_dir / submit_slurm.name)
+    shutil.copy(build_vtks, expr_dir / build_vtks.name)
 
     print(f"experiment created: {expr_dir}")
 

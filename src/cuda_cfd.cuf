@@ -3609,7 +3609,10 @@ DO WHILE ((TEMPO.LT.TFt).AND.(INDTPO.LE.NROTPO))
   NNNRRR = NNNRRR+1
   NCOUNTCOEF = NCOUNTCOEF+1
     
-  write(*,910) NNNRRR,TEMPO,SDETP, CD, CL	
+  if (MOD(NNNRRR,1000) .eq. 0) then
+    write(*,910) NNNRRR,TEMPO,SDETP, CD, CL	
+  endif
+
   
 ! Retencao da pressao, temperatura e concentra��es iniciais 
 ! para o calculo do residuo:									

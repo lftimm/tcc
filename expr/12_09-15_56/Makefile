@@ -3,16 +3,16 @@ mesh: tcc_lt.geo
 
 interface: ./src/interface.f90
 	gfortran ./src/interface.f90 -o ./interface
-	rm *.mod
+	rm -f *.mod
 
 cfd: ./src/cuda_cfd.cuf
-	nvfortran ../src/cuda_cfd -o ./cfd
-	rm *.mod
+	nvfortran ./src/cuda_cfd.cuf -o ./cfd
+	rm -f *.mod
 
 vtk: ./src/make_vtk.f90
 	gfortran ./src/make_vtk.f90 -o ./vtks
-	rm *.mod
+	rm -f *.mod
 
-run: ./src/submit.slurm
-    rsync --verbose --progress --recursive . lftimm@gppd-hpc.inf.ufrgs.br:vento_cfd 
-	ssh lftimm@gppd-hpc.inf.ufrgs.br "cd vento_cfd && sbatch ./src/submit.slurm"
+ssh:
+	rsync --verbose --progress --recursive . lftimm@gppd-hpc.inf.ufrgs.br:$(shell basename $(CURDIR))
+
