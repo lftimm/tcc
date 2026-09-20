@@ -79,28 +79,37 @@ Transfinite Surface {7} = {11, 14, 3, 16};
 Transfinite Surface {8} = {12, 11, 16, 4};
 
 
-house_eles = 50;
-prog = 1.02;
+outside_house = 200;
+house_eles = 100;
+world_eles = 150;
 
-Transfinite Curve {14, 9} = house_eles Using Progression prog;
-Transfinite Curve {5,11} = house_eles Using Progression 1/prog;
-
-outside_house = 150;
 Transfinite Curve {13, 16, 6, 8, 10, 22} = outside_house Using Progression 1;
 
-Transfinite Curve {7, 12, 19} = outside_house Using Progression 1;
+a = 1.01;
+Transfinite Curve {26} = world_eles Using Progression a;
+Transfinite Curve {4,  18} = world_eles Using Progression 1/a;
 
-world_eles = 100;
-world_prog = 1.02;
-Transfinite Curve {4,  18} = world_eles Using Progression 1/world_prog;
+b = 1;
+Transfinite Curve {7, 12, 19} = outside_house Using Progression b;
 
-Transfinite Curve {15, 23} = world_eles Using Progression world_prog;
+c = 1.015;
+Transfinite Curve {17} = world_eles*1.25 Using Progression c;
+Transfinite Curve {21, 24, 25} = world_eles*1.25 Using Progression 1/c;
 
-Transfinite Curve {20} = world_eles Using Progression 1/world_prog;
+d = 1.01;
+Transfinite Curve {15, 23} = world_eles Using Progression 1/d;
+Transfinite Curve {20} = world_eles Using Progression d;
 
-Transfinite Curve {21, 24, 25} = world_eles Using Progression 1/world_prog;
-
-Transfinite Curve {17, 26} = world_eles Using Progression world_prog;
-
+e = 1.002;
+Transfinite Curve {14, 9} = house_eles Using Progression e;
+Transfinite Curve {5,11} = house_eles Using Progression 1/e;
 
 Recombine Surface {4, 2, 1, 8, 3, 7, 6, 5};
+
+Extrude {0, 0, 1} {
+  Surface{5}; Surface{4};
+  Surface{6}; Surface{1};
+  Surface{2}; Surface{3};
+  Surface{8}; Surface{7};
+  Layers {1}; Recombine;
+}
