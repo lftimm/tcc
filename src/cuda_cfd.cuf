@@ -3617,7 +3617,8 @@ DO WHILE ((TEMPO.LT.TFt).AND.(INDTPO.LE.NROTPO))
 ! Retencao da pressao, temperatura e concentra��es iniciais 
 ! para o calculo do residuo:									
 
-  Pri = uvw_d(4,:)
+  uvw = uvw_d
+  Pri = uvw(4,:)
   
   ! Lan�amento do kernel	- Par�metros de entrada e de sa�da do c�digo do "Device"
   
@@ -3722,7 +3723,8 @@ call laco_21<<<ceiling(real(NNOS)/tBlock), tBlock>>>(mlum_d, K10_d, K20_d, K30_d
 						
 istat = cudaDeviceSynchronize()				
 
-Prf = uvw_d(4,:)
+uvw = uvw_d
+Prf = uvw(4,:)
 
 !write(*,*) 'Pressao - 20519', PRf(20519)
 

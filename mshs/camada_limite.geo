@@ -49,8 +49,6 @@ Line(25) = {13, 10};
 Line(26) = {10, 15};
 
 
-
-
 Curve Loop(1) = {12, 11, -7, 14};
 Plane Surface(1) = {1};
 
@@ -81,19 +79,20 @@ Transfinite Surface {7} = {11, 14, 3, 16};
 Transfinite Surface {8} = {12, 11, 16, 4};
 
 
-house_eles = 200;
-prog = 1.003;
+house_eles = 50;
+prog = 1.02;
+
 Transfinite Curve {14, 9} = house_eles Using Progression prog;
 Transfinite Curve {5,11} = house_eles Using Progression 1/prog;
 
-outside_house = 300;
+outside_house = 150;
 Transfinite Curve {13, 16, 6, 8, 10, 22} = outside_house Using Progression 1;
 
 Transfinite Curve {7, 12, 19} = outside_house Using Progression 1;
 
 world_eles = 100;
 world_prog = 1.02;
-Transfinite Curve {4,  18} = world_eles Using Progression world_prog;
+Transfinite Curve {4,  18} = world_eles Using Progression 1/world_prog;
 
 Transfinite Curve {15, 23} = world_eles Using Progression world_prog;
 
