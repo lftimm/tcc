@@ -1,1 +1,4 @@
 expr/**/.msh
+expr/**/.err
+expr/**/.out
+

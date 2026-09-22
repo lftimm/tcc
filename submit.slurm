@@ -8,7 +8,4 @@
 #SBATCH --time=24:00:00
 #SBATCH --gres=gpu:1
 
-make cfd
-./cfd
-NUM_ARQUIVOS=grep NTR INTERFACE.dat | awk '{print $1}'
-make vtk && ./build_vtks.sh tcc_lt 1 $NUM_ARQUIVOS
+make cfd && ./cfd
