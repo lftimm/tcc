@@ -17,7 +17,14 @@ def parse_args():
     parser.add_argument(
         "geo_file",
         type=Path,
-        help="Path to the .geo mesh file (for gmsh) to include in the experiment folder",
+    )
+    parser.add_argument(
+        "phys_file",
+        type=Path,
+    )
+    parser.add_argument(
+        "interface_dat_file",
+        type=Path,
     )
     return parser.parse_args()
 
@@ -25,19 +32,31 @@ def parse_args():
 def main():
     args = parse_args()
     geo_file = args.geo_file
+    phys_file = args.phys_file
+    interface_dat_file = args.interface_dat_file
 
     if geo_file.suffix != ".geo":
         sys.exit(f"error: '{geo_file}' is not a .geo file")
     if not geo_file.is_file():
         sys.exit(f"error: geo file not found: '{geo_file}'")
 
+    if phys_file.suffix != ".phys":
+        sys.exit(f"error: '{phys_file}' is not a .phys file")
+
+    if not phys_file.is_file():
+        sys.exit(f"error: .phys file not found: '{phys_file}'")
+
+    if interface_dat_file.suffix != ".dat":
+        sys.exit(f"error: '{interface_dat_file}' is not a .phys file")
+
+    if not interface_dat_file.is_file():
+        sys.exit(f"error: .phys file not found: '{interface_dat_file}'")
+
     project_root = Path(__file__).resolve().parent
     src_dir = project_root / "src"
     makefile = project_root / "Makefile"
-    submit_slurm = project_root / "submit.slurm"
+    slurm_file = project_root / "tupi.slurm"
 
-    interface_dat = src_dir / "INTERFACE.dat"
-    tcc_lt_phys = src_dir / "tcc_lt.phys"
     build_vtks = src_dir / "build_vtks.sh"
 
     for filename in SRC_FILES:
@@ -60,11 +79,12 @@ def main():
         shutil.copy(str(src_dir / filename), str(exp_src_dir / filename))
 
     shutil.copy(makefile, expr_dir / makefile.name)
-    shutil.copy(geo_file, expr_dir / "tcc_lt.geo")
 
-    shutil.copy(interface_dat, expr_dir / interface_dat.name)
-    shutil.copy(tcc_lt_phys, expr_dir / tcc_lt_phys.name)
-    shutil.copy(submit_slurm, expr_dir / submit_slurm.name)
+    shutil.copy(geo_file, expr_dir / "tcc_lt.geo")
+    shutil.copy(phys_file, expr_dir / "tcc_lt.phys")
+    shutil.copy(interface_dat_file, expr_dir / "INTERFACE.dat")
+
+    shutil.copy(slurm_file, expr_dir / slurm_file.name)
     shutil.copy(build_vtks, expr_dir / build_vtks.name)
 
     print(f"experiment created: {expr_dir}")
