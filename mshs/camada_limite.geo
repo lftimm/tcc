@@ -96,6 +96,13 @@ Transfinite Surface {9} = {10, 13, 14, 11};
 Transfinite Surface {10} = {15, 2, 13, 10};
 Transfinite Surface {11} = {1, 15, 10, 9};
 
+Physical Surface("Wall", 1) = {200, 134, 222, 182, 192, 274, 120};
+Physical Surface("Inlet", 2) = {102,80};
+Physical Surface("Outlet", 3) = {278, 252};
+Physical Surface("Slip", 4) = {68,54,256};
+Physical Surface("Extrude", 5) = {103,81,59,191,169,125,147,235,213,257,279,1,2,3,4,5,6,7,8,9,10,11};
+Physical Volume("Fluid",6) = {1,2,3,4,5,6,7,8,9,10,11};
+
 outside_house = 200;
 house_eles = 100;
 world_eles = 60;
@@ -139,3 +146,4 @@ Extrude {0, 0, 1} {
   Surface{8}; Surface{7};
   Layers {1}; Recombine;
 }
+

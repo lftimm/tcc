@@ -56,6 +56,7 @@ def main():
     src_dir = project_root / "src"
     makefile = project_root / "Makefile"
     slurm_file = project_root / "tupi.slurm"
+    local_run_file = project_root / "run_local.sh"
 
     build_vtks = src_dir / "build_vtks.sh"
 
@@ -86,6 +87,10 @@ def main():
 
     shutil.copy(slurm_file, expr_dir / slurm_file.name)
     shutil.copy(build_vtks, expr_dir / build_vtks.name)
+
+    if local_run_file.is_file():
+        shutil.copy(local_run_file, expr_dir / local_run_file.name)
+        (expr_dir / local_run_file.name).chmod(0o755)
 
     print(f"experiment created: {expr_dir}")
 

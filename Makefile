@@ -3,19 +3,19 @@ mesh: tcc_lt.geo
 
 interface: ./src/interface.f90
 	gfortran ./src/interface.f90 -o ./interface
-	rm -f *.mod
 
 cfd: ./src/cuda_cfd.cuf
-	nvfortran ./src/cuda_cfd.cuf -o ./cfd
-	rm -f *.mod
+	nvfortran -O3 ./src/cuda_cfd.cuf -o ./cfd
+
+run_sanitizer: cfd
+	compute-sanitizer --tool memcheck --report-api-errors explicit --leak-check full --language fortran --log-file ./sw/compute_sanitizer.txt ./cfd
 
 vtk: ./src/make_vtk.f90
 	gfortran ./src/make_vtk.f90 -o ./vtks
-	rm -f *.mod
 
 ssh:
 	rsync --verbose --progress --recursive . lftimm@gppd-hpc.inf.ufrgs.br:$(shell basename $(CURDIR))
-	ssh -i ~/.ssh/id_ed25519 lftimm@pcad.inf.ufrgs.br 'cd $(shell basename $(CURDIR)) && sbatch --wait submit.slurm'
+	ssh -i ~/.ssh/id_ed25519 lftimm@pcad.inf.ufrgs.br 'cd $(shell basename $(CURDIR)) && sbatch tupi.slurm'
 	mkdir -p resultados
 	rsync --verbose --progress --recursive "lftimm@gppd-hpc.inf.ufrgs.br:$(shell basename $(CURDIR))/tcc_lt[0-9][0-9][1-9]*" ./resultados
 

@@ -2703,13 +2703,19 @@ DO IP=1,8
     I1 = 8*I - 8 + IP
     NODE = KONE(I1)
     NEIBOR(0,NODE) = NEIBOR(0,NODE) + 1
-    NEIBOL(0,NODE) = NEIBOR(0,NODE)          !XXXXP 
+    NEIBOL(0,NODE) = NEIBOR(0,NODE)          !XXXXP
     IPOS = NEIBOR(0,NODE)
+    IF (IPOS .GT. 12) THEN
+      WRITE(*,*) 'ERRO FATAL: NO ', NODE, ' TEM MAIS DE 12 ELEMENTOS CONCORRENTES (', IPOS, ').'
+      WRITE(*,*) 'NEIBOR/NEIBOL (e os buffers K10..K120/L1..L12) sao dimensionados para no maximo 12.'
+      WRITE(*,*) 'Escrever alem do limite corrompe silenciosamente a memoria do no seguinte.'
+      STOP 1
+    END IF
     NEIBOR(IPOS,NODE) = I
    NEIBOL(IPOS,NODE) = IP                   !XXXXP
 
-  END DO 
-END DO 
+  END DO
+END DO
 
 ! *************************************************************************************
 
