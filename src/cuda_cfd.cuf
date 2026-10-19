@@ -1828,9 +1828,9 @@ program CUDA_HEXA_IGOR
 
 ! 026_003 - Embankment
 PARAMETER (NEMAX=297500,NNOS=597362,&
-           MNOBJ=0,NNCSX=6384,NFCSX=6125,&
+           MNOBJ=1,NNCSX=502,NFCSX=250,&
            NBU=3962,NBV=3206,NBW=597362,NBP=762,&
-		   NCMAX=0, NNMAX=0)
+	   NCMAX=0, NNMAX=0)
 
 !*************************** DEFINICAO DOS PARAMETROS ******************************
 !***********************************************************************************
@@ -3823,12 +3823,9 @@ IF(NNR.EQ.NIR) THEN
 ! ***********************************************************************
 
 	IF(NCOUNTCOEF.EQ.NCOEF) THEN
-	
 		uvw = uvw_d;
 		!VDTurb = VDTurb_d
-
 		NCOUNTCOEF=0
-		
 		!call laco_27<<<ceiling(real(NBJ)/tBlock), tBlock>>>(uvw_d, PASSMED_d, VtSuav_d, PRSuav_d, Umed_d, &
 		!								Vmed_d, Wmed_d, PRmed_d, VTmed_d, PRSmed_d)	
 		!istat = cudaDeviceSynchronize()

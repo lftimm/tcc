@@ -13,7 +13,7 @@
 !	Log = Número de CC do tipo Lei Logarítmica - NÃO IMPLEMENTADO
 ! **********************************
 $GroupCount
-5	5	0	1	0
+5	6	0	1	0
 $EndGroupCount
 ! **********************************
 ! Especificação do tipo de condição de contorno (CC)
@@ -35,10 +35,11 @@ $EndGroupCount
 ! **********************************
 $GroupType
 1	1	1	0	0
-2	3	0	0	0
+2	3	1	0	0
 3	0	0	0	1
 4	0	1	0	0
 5	0	0	1	0
+6	1	1	0	0
 $EndGroupType
 ! **********************************
 ! Especificação do valor para CC constante
@@ -61,7 +62,7 @@ $EndConstantValues
 !		*OBS: Lei de Potência aumenta com y positivo
 ! **********************************
 $PowerLawValues
-45.8	0	10	0.009
+45.08	0	10	0.09
 $EndPowerLawValues
 ! **********************************
 ! Especificação do valor para CC por Lei Logarítmica
@@ -92,8 +93,9 @@ $EndObjectCount
 !	Group = Número do grupo físico ao qual o objeto pertence
 !		*OBS: Um objeto não pode pertencer a mais de um grupo físico
 ! **********************************
-! $ObjectProp
-! $EndObjectProp
+$ObjectProp
+6
+$EndObjectProp
 ! **********************************
 ! Apresenta o número do grupo usado como base para o campo inicial de velocidade e pressão
 ! Neste caso, CC livres são tratadas como nulas

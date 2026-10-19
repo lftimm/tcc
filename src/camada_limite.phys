@@ -61,7 +61,7 @@ $EndConstantValues
 !		*OBS: Lei de Potência aumenta com y positivo
 ! **********************************
 ! $PowerLawValues
-45.8	0	10	0.009
+45.8	0	10	0.09
 ! $EndPowerLawValues
 ! **********************************
 ! Especificação do valor para CC por Lei Logarítmica

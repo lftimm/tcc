@@ -83,7 +83,7 @@ $EndConstantValues
 !	N = Número total de objetos submersos
 ! **********************************
 $ObjectCount
-0   
+1   
 $EndObjectCount
 ! **********************************
 ! Propriedades dos objetos submersos no modelo
