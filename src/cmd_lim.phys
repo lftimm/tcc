@@ -13,7 +13,7 @@
 !	Log = Número de CC do tipo Lei Logarítmica - NÃO IMPLEMENTADO
 ! **********************************
 $GroupCount
-5	6	0	1	0
+6	8	0	1	0
 $EndGroupCount
 ! **********************************
 ! Especificação do tipo de condição de contorno (CC)
@@ -84,7 +84,7 @@ $EndPowerLawValues
 !	N = Número total de objetos submersos
 ! **********************************
 $ObjectCount
-0   
+1   
 $EndObjectCount
 ! **********************************
 ! Propriedades dos objetos submersos no modelo

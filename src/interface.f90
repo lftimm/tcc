@@ -199,7 +199,8 @@ program Interface_Gmsh_Hexa
     ! DADOS INICIAIS
     !**********************************************************************
 	ptname (1:6) = 'tcc_lt'
-	
+	pname = 'tcc_lt'
+
 	open (103, file='INTERFACE.dat', status='old')
 
 	read(103,*) NQUAD
@@ -560,7 +561,7 @@ program Interface_Gmsh_Hexa
 						end if
 					end do
 					
-					V1 = PowerLaw(yy(i), valuePowerCC(j,1), valuePowerCC(j,2), valuePowerCC(j,3), valuePowerCC(j,4))
+					V1 = PowerLaw(zz(i), valuePowerCC(j,1), valuePowerCC(j,2), valuePowerCC(j,3), valuePowerCC(j,4))
 				case (4)
 					! Campo em Lei Logaritmica
 					! TODO - Implementar
@@ -588,7 +589,7 @@ program Interface_Gmsh_Hexa
 						end if
 					end do
 					
-					V3 = PowerLaw(yy(i), valuePowerCC(j,1), valuePowerCC(j,2), valuePowerCC(j,3), valuePowerCC(j,4))
+					V3 = PowerLaw(zz(i), valuePowerCC(j,1), valuePowerCC(j,2), valuePowerCC(j,3), valuePowerCC(j,4))
 				case (4)
 					! Campo em Lei Logaritmica
 					! TODO - Implementar
@@ -757,10 +758,10 @@ program Interface_Gmsh_Hexa
 					call AddNewCCNodes(ntn, nV1potnodes, 4, nccV1potnodes, quadnodes)
 					
 					! TODO - Refatorar
-                    call UpdatePowerLawCCValues(ntn, nccV1potnodes, n1, yy(n1), valuePowerCC(j,:), vccV1potnodes)
-                    call UpdatePowerLawCCValues(ntn, nccV1potnodes, n2, yy(n2), valuePowerCC(j,:), vccV1potnodes)
-                    call UpdatePowerLawCCValues(ntn, nccV1potnodes, n3, yy(n3), valuePowerCC(j,:), vccV1potnodes)
-                    call UpdatePowerLawCCValues(ntn, nccV1potnodes, n4, yy(n4), valuePowerCC(j,:), vccV1potnodes)
+                    call UpdatePowerLawCCValues(ntn, nccV1potnodes, n1, zz(n1), valuePowerCC(j,:), vccV1potnodes)
+                    call UpdatePowerLawCCValues(ntn, nccV1potnodes, n2, zz(n2), valuePowerCC(j,:), vccV1potnodes)
+                    call UpdatePowerLawCCValues(ntn, nccV1potnodes, n3, zz(n3), valuePowerCC(j,:), vccV1potnodes)
+                    call UpdatePowerLawCCValues(ntn, nccV1potnodes, n4, zz(n4), valuePowerCC(j,:), vccV1potnodes)
 				case (4)
 					! CC Log
 					
@@ -777,10 +778,10 @@ program Interface_Gmsh_Hexa
 					end do
                     
 					call AddNewCCNodes(ntn, nV1lognodes, 4, nccV1lognodes, quadnodes)
-                    call UpdateLogLawCCValues(ntn, nccV1lognodes, n1, yy(n1), valueLogCC(j,:), vccV1lognodes)
-                    call UpdateLogLawCCValues(ntn, nccV1lognodes, n2, yy(n2), valueLogCC(j,:), vccV1lognodes)
-                    call UpdateLogLawCCValues(ntn, nccV1lognodes, n3, yy(n3), valueLogCC(j,:), vccV1lognodes)
-                    call UpdateLogLawCCValues(ntn, nccV1lognodes, n4, yy(n4), valueLogCC(j,:), vccV1lognodes)
+                    call UpdateLogLawCCValues(ntn, nccV1lognodes, n1, zz(n1), valueLogCC(j,:), vccV1lognodes)
+                    call UpdateLogLawCCValues(ntn, nccV1lognodes, n2, zz(n2), valueLogCC(j,:), vccV1lognodes)
+                    call UpdateLogLawCCValues(ntn, nccV1lognodes, n3, zz(n3), valueLogCC(j,:), vccV1lognodes)
+                    call UpdateLogLawCCValues(ntn, nccV1lognodes, n4, zz(n4), valueLogCC(j,:), vccV1lognodes)
 				end select
                 
 				! V2
@@ -832,10 +833,10 @@ program Interface_Gmsh_Hexa
 					call AddNewCCNodes(ntn, nV2potnodes, 4, nccV2potnodes, quadnodes)
 					
 					! TODO - Refatorar
-                    call UpdatePowerLawCCValues(ntn, nccV2potnodes, n1, yy(n1), valuePowerCC(j,:), vccV2potnodes)
-                    call UpdatePowerLawCCValues(ntn, nccV2potnodes, n2, yy(n2), valuePowerCC(j,:), vccV2potnodes)
-                    call UpdatePowerLawCCValues(ntn, nccV2potnodes, n3, yy(n3), valuePowerCC(j,:), vccV2potnodes)
-                    call UpdatePowerLawCCValues(ntn, nccV2potnodes, n4, yy(n4), valuePowerCC(j,:), vccV2potnodes)
+                    call UpdatePowerLawCCValues(ntn, nccV2potnodes, n1, zz(n1), valuePowerCC(j,:), vccV2potnodes)
+                    call UpdatePowerLawCCValues(ntn, nccV2potnodes, n2, zz(n2), valuePowerCC(j,:), vccV2potnodes)
+                    call UpdatePowerLawCCValues(ntn, nccV2potnodes, n3, zz(n3), valuePowerCC(j,:), vccV2potnodes)
+                    call UpdatePowerLawCCValues(ntn, nccV2potnodes, n4, zz(n4), valuePowerCC(j,:), vccV2potnodes)
 				case (4)
 					! CC Log
 					
@@ -852,10 +853,10 @@ program Interface_Gmsh_Hexa
 					end do
                     
 					call AddNewCCNodes(ntn, nV2lognodes, 4, nccV2lognodes, quadnodes)
-                    call UpdateLogLawCCValues(ntn, nccV2lognodes, n1, yy(n1), valueLogCC(j,:), vccV2lognodes)
-                    call UpdateLogLawCCValues(ntn, nccV2lognodes, n2, yy(n2), valueLogCC(j,:), vccV2lognodes)
-                    call UpdateLogLawCCValues(ntn, nccV2lognodes, n3, yy(n3), valueLogCC(j,:), vccV2lognodes)
-                    call UpdateLogLawCCValues(ntn, nccV2lognodes, n4, yy(n4), valueLogCC(j,:), vccV2lognodes)
+                    call UpdateLogLawCCValues(ntn, nccV2lognodes, n1, zz(n1), valueLogCC(j,:), vccV2lognodes)
+                    call UpdateLogLawCCValues(ntn, nccV2lognodes, n2, zz(n2), valueLogCC(j,:), vccV2lognodes)
+                    call UpdateLogLawCCValues(ntn, nccV2lognodes, n3, zz(n3), valueLogCC(j,:), vccV2lognodes)
+                    call UpdateLogLawCCValues(ntn, nccV2lognodes, n4, zz(n4), valueLogCC(j,:), vccV2lognodes)
 				end select
 				
 				! V3

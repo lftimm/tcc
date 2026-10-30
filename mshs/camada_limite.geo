@@ -96,13 +96,6 @@ Transfinite Surface {9} = {10, 13, 14, 11};
 Transfinite Surface {10} = {15, 2, 13, 10};
 Transfinite Surface {11} = {1, 15, 10, 9};
 
-Physical Surface("Wall", 1) = {182, 192, 274, 120};
-Physical Surface("Inlet", 2) = {102,80};
-Physical Surface("Outlet", 3) = {278, 252};
-Physical Surface("Slip", 4) = {68,54,256};
-Physical Surface("Extrude", 5) = {103,81,59,191,169,125,147,235,213,257,279,1,2,3,4,5,6,7,8,9,10,11};
-Physical Surface("House",6) = {200,222,134};
-Physical Volume("Fluid",7) = {1,2,3,4,5,6,7,8,9,10,11};
 
 outside_house = 200;
 house_eles = 100;
@@ -121,21 +114,21 @@ ed = 50;
 
 ee = 100;
 
-Transfinite Curve {16, 13, 29, 6, 8, 31, 10, 22} = ea Using Progression 1;
-Transfinite Curve {27, 36, 37, 32} = eb Using Progression 1;
-Transfinite Curve {7, 30, 12, 19} = ec Using Progression 1;
+Transfinite Curve {16, 13, 29, 6, 8, 31, 10, 22} = ea+1 Using Progression 1;
+Transfinite Curve {27, 36, 37, 32} = eb+1 Using Progression 1;
+Transfinite Curve {7, 30, 12, 19} = ec+1 Using Progression 1;
 
-Transfinite Curve {28, 35, 33} = ed Using Progression a;
-Transfinite Curve {34} = ed Using Progression 1/a;
+Transfinite Curve {28, 35, 33} = ed+1 Using Progression a;
+Transfinite Curve {34} = ed+1 Using Progression 1/a;
 
-Transfinite Curve {26} = ee Using Progression b;
-Transfinite Curve {4,18} = ee Using Progression 1/b;
+Transfinite Curve {26} = ee+1 Using Progression b;
+Transfinite Curve {4,18} = ee+1 Using Progression 1/b;
 
-Transfinite Curve {17} = ee Using Progression c;
-Transfinite Curve {25, 24, 21} = ee Using Progression 1/c;
+Transfinite Curve {17} = ee+1 Using Progression c;
+Transfinite Curve {25, 24, 21} = ee+1 Using Progression 1/c;
 
-Transfinite Curve {20} = ee Using Progression d;
-Transfinite Curve {15, 23} = ee Using Progression 1/d;
+Transfinite Curve {20} = ee+1 Using Progression d;
+Transfinite Curve {15, 23} = ee+1 Using Progression 1/d;
 
 Recombine Surface {10, 9, 11, 1, 3, 2, 6, 5, 7, 4, 8};
 
@@ -148,3 +141,10 @@ Extrude {0, 0, 1} {
   Layers {1}; Recombine;
 }
 
+Physical Surface("Wall", 1) = {90,182,212,138,128,120,274};
+Physical Surface("Inlet", 2) = {80,102};
+Physical Surface("Outlet", 3) = {252,278};
+Physical Surface("Slip", 4) = {68,54,256};
+Physical Surface("Extrude", 5) = {81,10,11,103,59,9,1,191,169,6,125,5,213,2,4,147,3,235,279,7,257,8};
+Physical Surface("House",6) = {200,222,134};
+Physical Volume("Fluid",7) = {90,182,212,138,128,120,274,252,278,80,102,68,54,256,81,10,11,103,59,9,1,191,169,6,125,5,213,2,4,147,3,235,279,7,257,8,200,222,134};

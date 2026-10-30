@@ -1,16 +1,13 @@
 #!/usr/bin/bash
 
-#SBATCH --job-name=vento_cfd
+#SBATCH --job-name=cfd_analise_desempenho
 #SBATCH --partition=tupi
 #SBATCH --nodes=1
 #SBATCH --output=%x_%j.out
 #SBATCH --error=%x_%j.err
-#SBATCH --time=15:00:00
+#SBATCH --time=3:00:00
 #SBATCH --gres=gpu:1
-
-set -e
 
 export PATH=$NVHPC_ROOT/compilers/bin:$PATH
 
-./run_local.sh
-
+./run.sh on_ssh

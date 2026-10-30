@@ -1,5 +1,7 @@
 #!/usr/bin/bash
 
+make vtk
+
 set -e
 
 if [ "$#" -ne 2 ]; then
