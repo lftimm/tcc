@@ -4,7 +4,7 @@ make vtk
 
 set -e
 
-if [ "$#" -ne 2 ]; then
+if [ "$#" -ne 3 ]; then
 	echo "uso: $0 NOME_PROJETO PRIMEIRO_ARQUIVO NUMERO_ARQUIVOS" >&2;
 	exit 1;
 fi

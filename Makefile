@@ -1,3 +1,7 @@
+pdf:
+	latexmk -pdf main.tex 
+	rm -f *.bbl *.blg *.dvi *.fdb_latexmk *.fls *.log *.out *.aux                                                          master
+
 mesh: tcc_lt.geo
 	gmsh tcc_lt.geo -3 -format msh2 -o tcc_lt.msh
 

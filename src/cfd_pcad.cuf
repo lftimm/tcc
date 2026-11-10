@@ -1,4 +1,4 @@
-!*******************************************************************************C
+3413!*******************************************************************************C
 
 !*******************************************************************************C
 !*                                                                             *C
@@ -1848,9 +1848,9 @@ program CUDA_HEXA_IGOR
 	integer(4) :: NEMAX, NNOS, MNOBJ, NNCSX, NFCSX, NBU, NBV, NBW, NBP, NCMAX, NNMAX
 
 ! 026_003 - Embankment
-PARAMETER (NEMAX=57937,NNOS=115984,&
-           MNOBJ=1,NNCSX=248,NFCSX=247,&
-           NBU=1242,NBV=1836,NBW=115984,NBP=348,&
+PARAMETER (NEMAX=114375,NNOS=230502,&
+           MNOBJ=1,NNCSX=502,NFCSX=250,&
+           NBU=2152,NBV=1754,NBW=230502,NBP=1352,&
 	   NCMAX=0, NNMAX=0)
 
 !*************************** DEFINICAO DOS PARAMETROS ******************************
@@ -4152,6 +4152,9 @@ IF(NNR.EQ.NIR) THEN
 
         NARQ=NARQ+1 	! 35, 41, 47, 53...
         WRITE(NARQ,*) tempo,Mz
+
+        NARQ=NARQ+1 	! COEFICIENTES DE PRESSAO
+        WRITE(NARQ,*) tempo, uvw(4,5704), uvw(4,5769), uvw(4,5139)
 
         NARQ=NARQ+1
 
